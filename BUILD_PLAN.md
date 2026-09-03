@@ -120,7 +120,7 @@ these run, generate real additive migrations with `prisma migrate dev` instead.
       `Retry-After` header via the `jsonError` envelope. No new external
       service. Confirm `npm run build` passes."
 
-- [ ] **9.3** "Replace the single `Order.revisionNote` with a `RevisionRequest`
+- [x] **9.3** "Replace the single `Order.revisionNote` with a `RevisionRequest`
       model (id, orderId, note, createdAt, status `open` | `addressed`).
       Add a `ProcessedWebhookEvent` model (provider, eventId,
       `@@unique([provider, eventId])`, processedAt). Regenerate the migration.
