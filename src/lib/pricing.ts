@@ -12,6 +12,8 @@ export type TierId = 1 | 2 | 3 | 4;
 export interface Tier {
   id: TierId;
   name: string;
+  /** short label used on the marketing surface, where "Tier 2" says nothing */
+  short: string;
   tagline: string;
   pricePaise: number;
   /** true => display as "from ₹X" (Tier 4 is quoted after discovery) */
@@ -23,6 +25,7 @@ export const TIERS: Tier[] = [
   {
     id: 1,
     name: "Tier 1",
+    short: "Make it yourself",
     tagline: "Pick a template, flat fee",
     pricePaise: 499900,
     priceIsFrom: false,
@@ -36,6 +39,7 @@ export const TIERS: Tier[] = [
   {
     id: 2,
     name: "Tier 2",
+    short: "Customised",
     tagline: "Template plus customized features",
     pricePaise: 999900,
     priceIsFrom: false,
@@ -48,6 +52,7 @@ export const TIERS: Tier[] = [
   {
     id: 3,
     name: "Tier 3",
+    short: "Advanced",
     tagline: "Advanced features",
     pricePaise: 1999900,
     priceIsFrom: false,
@@ -60,6 +65,7 @@ export const TIERS: Tier[] = [
   {
     id: 4,
     name: "Tier 4",
+    short: "Fully custom",
     tagline: "Fully custom project",
     pricePaise: 3999900,
     priceIsFrom: true,
