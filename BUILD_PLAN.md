@@ -26,7 +26,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       Add Prisma with a Postgres datasource. Create the schema from the data
       model in CLAUDE.md (User, Order, Asset, Payment, Receipt) and run the
       initial migration. Confirm `npm run build` passes."
-- [ ] **1.2** "Integrate Clerk for auth. Add sign-in/sign-up pages. Add
+- [x] **1.2** "Integrate Clerk for auth. Add sign-in/sign-up pages. Add
       middleware so `/dashboard/*` requires login and `/admin/*` requires
       login AND role === 'admin' (store role on the User model, sync on
       Clerk webhook or first login). Confirm both redirects work."
