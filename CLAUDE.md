@@ -49,7 +49,8 @@ This platform only needs to let customers select a category when ordering.
 - **User** — id, name, email, phone, role (`customer` | `admin`)
 - **Order** — id, userId, category, tier (1-4), deliveryPlan, addons (json),
   requirementsText, status (`pending_payment` → `new` → `in_progress` →
-  `revision_requested` → `delivered`), revisionNote, deadlineDate, priceTotal
+  `revision_requested` → `delivered`), revisionNote, deliveredUrl,
+  deadlineDate, priceTotal
 - **Asset** — id, orderId, fileUrl, fileName
 - **Payment** — id, orderId, razorpayOrderId, razorpayPaymentId, amount,
   type (`order` | `hosting`), status

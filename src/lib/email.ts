@@ -36,6 +36,26 @@ export async function sendOrderConfirmation(opts: {
   });
 }
 
+export async function sendStatusUpdate(opts: {
+  to: string;
+  orderId: string;
+  statusLabel: string;
+  deliveredUrl?: string | null;
+}): Promise<void> {
+  await resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: `Update on your order ${opts.orderId}`,
+    text: [
+      `Your order ${opts.orderId} is now: ${opts.statusLabel}.`,
+      opts.deliveredUrl ? `\nYour site is live: ${opts.deliveredUrl}` : "",
+      APP_URL ? `\nDetails: ${APP_URL}/dashboard/orders/${opts.orderId}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  });
+}
+
 export async function sendAdminNewOrder(opts: {
   orderId: string;
   category: string;

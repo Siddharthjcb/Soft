@@ -70,6 +70,7 @@ model Order {
   requirementsText String?
   status           OrderStatus  @default(pending_payment)
   revisionNote     String? // latest customer revision request (task 4.1)
+  deliveredUrl     String? // live site URL, set when marked delivered (task 5.1)
   deadlineDate     DateTime?
   priceTotal       Int // paise
   assets           Asset[]

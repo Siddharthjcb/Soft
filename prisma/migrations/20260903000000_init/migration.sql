@@ -44,6 +44,7 @@ CREATE TABLE "Order" (
     "requirementsText" TEXT,
     "status" "OrderStatus" NOT NULL DEFAULT 'pending_payment',
     "revisionNote" TEXT,
+    "deliveredUrl" TEXT,
     "deadlineDate" TIMESTAMP(3),
     "priceTotal" INTEGER NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

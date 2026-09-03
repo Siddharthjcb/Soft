@@ -1,12 +1,5 @@
 import { OrderStatus } from "@prisma/client";
-
-const LABELS: Record<OrderStatus, string> = {
-  pending_payment: "Awaiting payment",
-  new: "New",
-  in_progress: "In progress",
-  revision_requested: "Revision requested",
-  delivered: "Delivered",
-};
+import { STATUS_LABELS } from "@/lib/order-display";
 
 /**
  * Monochrome by default (DESIGN.md). `success` is the only non-neutral colour
@@ -20,7 +13,7 @@ export function StatusBadge({ status }: { status: OrderStatus }) {
         delivered ? "text-success" : "text-muted"
       }`}
     >
-      {LABELS[status]}
+      {STATUS_LABELS[status]}
     </span>
   );
 }
