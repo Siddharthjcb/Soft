@@ -97,7 +97,7 @@ tables; while there is still no live database they regenerate the single init
 migration (as earlier phases did). If the DB is already migrated by the time
 these run, generate real additive migrations with `prisma migrate dev` instead.
 
-- [ ] **9.1** "Add request validation to every API route. Install zod. Create
+- [x] **9.1** "Add request validation to every API route. Install zod. Create
       `src/lib/api.ts` with `jsonError(status, code, message)` returning a
       consistent `{ error: { code, message } }` envelope, and
       `parseJson(schema, request)` / `parseParams(schema, params)` helpers built
