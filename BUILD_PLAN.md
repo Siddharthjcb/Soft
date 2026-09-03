@@ -48,7 +48,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       review + confirm. On confirm, create an Order row with status
       pending_payment and redirect to a payment step. Require login before
       step 5 (send anonymous users to sign-in, preserve their form state)."
-- [ ] **3.2** "Integrate Razorpay: create a Razorpay order server-side for the
+- [x] **3.2** "Integrate Razorpay: create a Razorpay order server-side for the
       computed total, open Razorpay Checkout client-side, and implement the
       webhook endpoint that verifies the signature and marks the Payment row
       success + flips the Order to status 'new'. Use test mode keys."
