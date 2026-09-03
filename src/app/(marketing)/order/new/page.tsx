@@ -2,7 +2,12 @@ import { auth } from "@clerk/nextjs/server";
 import { Container } from "@/components/ui/container";
 import { OrderForm } from "@/components/order/order-form";
 
-export const metadata = { title: "Start an order" };
+export const metadata = {
+  title: "Start an order",
+  description:
+    "Pick a category and tier, describe what you need, and pay securely. Five steps, no calls required.",
+  alternates: { canonical: "/order/new" },
+};
 
 export default async function NewOrderPage() {
   const { userId } = await auth();

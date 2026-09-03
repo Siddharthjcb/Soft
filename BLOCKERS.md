@@ -71,6 +71,14 @@ because that is what Clerk documents.
 **To close:** revisit when Clerk documents `proxy.ts`, or run
 `npx @next/codemod@canary middleware-to-proxy .` and verify auth still gates.
 
+## B-13 — Brand identity and domain are placeholders · `needs-operator`
+`src/lib/site.ts` drives every SEO surface (metadata, OpenGraph, sitemap,
+robots, JSON-LD) and currently uses "Website Ordering Platform" and
+`http://localhost:3000`. There is also no OG image or favicon.
+**To close:** decide the business name, buy the domain, set
+`NEXT_PUBLIC_APP_NAME` and `NEXT_PUBLIC_APP_URL` in Vercel, and supply a logo /
+OG image. Marked in code with `BLOCKED(B-13)`.
+
 ## B-12 — `/admin/customers` totals computed in memory · `open`
 The customer list pulls every user's orders and sums `priceTotal` in JS. Fine
 at operator scale, wrong shape once there are many customers or orders.

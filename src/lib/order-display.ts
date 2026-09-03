@@ -1,4 +1,4 @@
-import { OrderStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { CATEGORIES } from "@/lib/categories";
 import { TIERS, DELIVERY_OPTIONS, ADDONS } from "@/lib/pricing";
 
@@ -19,6 +19,17 @@ export const STATUS_LABELS: Record<OrderStatus, string> = {
 };
 
 export const statusLabel = (s: OrderStatus): string => STATUS_LABELS[s];
+
+export const PAYMENT_TYPE_LABELS: Record<PaymentType, string> = {
+  order: "Order",
+  hosting: "Hosting",
+};
+
+export const PAYMENT_STATUS_LABELS: Record<PaymentStatus, string> = {
+  created: "Pending",
+  success: "Paid",
+  failed: "Failed",
+};
 
 export const categoryLabel = (id: string): string =>
   CATEGORIES.find((c) => c.id === id)?.name ?? id;

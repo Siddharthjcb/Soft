@@ -8,7 +8,12 @@ import {
 } from "@/lib/pricing";
 import { formatINR } from "@/lib/format";
 
-export const metadata = { title: "Pricing" };
+export const metadata = {
+  title: "Pricing",
+  description:
+    "Flat tier pricing in \u20B9 for websites and systems: pick a template, add customization or advanced features, or commission a fully custom build. Rush delivery and hosting available.",
+  alternates: { canonical: "/pricing" },
+};
 
 export default function PricingPage() {
   return (

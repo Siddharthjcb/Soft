@@ -2,7 +2,12 @@ import { Container } from "@/components/ui/container";
 import { ButtonLink } from "@/components/ui/button";
 import { CATEGORIES } from "@/lib/categories";
 
-export const metadata = { title: "Work" };
+export const metadata = {
+  title: "Work",
+  description:
+    "Recent websites and systems built for cloud kitchens, local vendors and students across India.",
+  alternates: { canonical: "/portfolio" },
+};
 
 export default function PortfolioPage() {
   return (

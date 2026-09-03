@@ -128,6 +128,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change)
 - **Outside the project:** None
 
+### 10.3 — Customer billing page + SEO
+- **A** `src/app/dashboard/billing/page.tsx`, `src/lib/site.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`
+- **M** `src/app/layout.tsx`, `src/app/dashboard/layout.tsx`, `src/app/(marketing)/page.tsx`, `src/app/(marketing)/pricing/page.tsx`, `src/app/(marketing)/portfolio/page.tsx`, `src/app/(marketing)/order/new/page.tsx`, `src/lib/order-display.ts`, `BLOCKERS.md` (added B-13)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

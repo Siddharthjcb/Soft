@@ -1,13 +1,55 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import { ButtonLink } from "@/components/ui/button";
 import { TIERS } from "@/lib/pricing";
 import { CATEGORIES } from "@/lib/categories";
 import { formatINR } from "@/lib/format";
+import { SITE, absoluteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  description: SITE.description,
+  alternates: { canonical: "/" },
+};
+
+// BLOCKED(B-13): brand name and domain are placeholders — see src/lib/site.ts.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": absoluteUrl("/#organization"),
+      name: SITE.name,
+      url: SITE.url,
+      description: SITE.description,
+      areaServed: SITE.areaServed,
+    },
+    {
+      "@type": "Service",
+      "@id": absoluteUrl("/#service"),
+      name: "Website and system development",
+      serviceType: "Web development",
+      provider: { "@id": absoluteUrl("/#organization") },
+      areaServed: SITE.areaServed,
+      offers: TIERS.map((t) => ({
+        "@type": "Offer",
+        name: t.name,
+        description: t.tagline,
+        price: (t.pricePaise / 100).toFixed(2),
+        priceCurrency: "INR",
+        url: absoluteUrl("/pricing"),
+      })),
+    },
+  ],
+};
 
 export default function HomePage() {
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Hero — one headline, one subhead, one CTA (DESIGN.md). */}
       <section className="py-24 sm:py-32">
         <Container className="flex flex-col items-start gap-6">
