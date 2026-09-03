@@ -81,7 +81,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       so far: font stack applied, spacing rhythm consistent, only one accent
       color in use, buttons/cards match spec, mobile responsive down to
       375px width. Fix any drift."
-- [ ] **7.2** "Add basic empty/loading/error states to every data-fetching
+- [x] **7.2** "Add basic empty/loading/error states to every data-fetching
       page. Add a simple 404 page matching the design system."
 
 ## Phase 8 — Buffer
