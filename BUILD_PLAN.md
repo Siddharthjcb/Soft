@@ -52,7 +52,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       computed total, open Razorpay Checkout client-side, and implement the
       webhook endpoint that verifies the signature and marks the Payment row
       success + flips the Order to status 'new'. Use test mode keys."
-- [ ] **3.3** "On successful payment, generate a PDF receipt (react-pdf) with
+- [x] **3.3** "On successful payment, generate a PDF receipt (react-pdf) with
       the order line items and email it via Resend along with an order
       confirmation. Also send an email notification to the admin address for
       every new order."
