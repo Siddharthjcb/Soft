@@ -1,0 +1,116 @@
+// Prisma schema — source of truth is CLAUDE.md "Data model".
+// Money is stored as integers in paise, never floats.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  customer
+  admin
+}
+
+enum Category {
+  portfolio // school / college students
+  restaurant // cloud kitchens — restaurant ordering
+  management // small vendors — management system
+  dashboard // dashboard / other custom
+}
+
+enum DeliveryPlan {
+  rush_2_day
+  standard_1_week
+}
+
+enum OrderStatus {
+  pending_payment
+  new
+  in_progress
+  revision_requested
+  delivered
+}
+
+enum PaymentType {
+  order
+  hosting
+}
+
+enum PaymentStatus {
+  created
+  success
+  failed
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  name      String?
+  email     String   @unique
+  phone     String?
+  role      Role     @default(customer)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id               String       @id @default(cuid())
+  userId           String
+  user             User         @relation(fields: [userId], references: [id])
+  category         Category
+  tier             Int // 1-4, see CLAUDE.md Tiers
+  deliveryPlan     DeliveryPlan
+  addons           Json         @default("[]")
+  requirementsText String?
+  status           OrderStatus  @default(pending_payment)
+  deadlineDate     DateTime?
+  priceTotal       Int // paise
+  assets           Asset[]
+  payments         Payment[]
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileName  String
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  order             Order         @relation(fields: [orderId], references: [id])
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?       @unique
+  amount            Int // paise
+  type              PaymentType   @default(order)
+  status            PaymentStatus @default(created)
+  receipt           Receipt?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([orderId])
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  paymentId     String   @unique
+  payment       Payment  @relation(fields: [paymentId], references: [id])
+  receiptNumber String   @unique
+  issuedAt      DateTime @default(now())
+}
