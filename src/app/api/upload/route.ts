@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
 import { auth } from "@clerk/nextjs/server";
 import { jsonError, requireApiUser } from "@/lib/api";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 
 /**
  * Client-upload token endpoint for order assets (Vercel Blob).
@@ -15,6 +16,13 @@ import { jsonError, requireApiUser } from "@/lib/api";
 export async function POST(request: Request): Promise<NextResponse> {
   const authed = await requireApiUser();
   if (!authed.ok) return authed.response;
+
+  const limited = await enforceRateLimit({
+    request,
+    userId: authed.user.id,
+    ...LIMITS.upload,
+  });
+  if (limited) return limited;
 
   let body: HandleUploadBody;
   try {

@@ -93,6 +93,16 @@ CREATE TABLE "Receipt" (
 );
 
 -- CreateTable
+CREATE TABLE "RateLimit" (
+    "id" TEXT NOT NULL,
+    "key" TEXT NOT NULL,
+    "windowStart" TIMESTAMP(3) NOT NULL,
+    "count" INTEGER NOT NULL DEFAULT 0,
+
+    CONSTRAINT "RateLimit_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "HostingSubscription" (
     "id" TEXT NOT NULL,
     "orderId" TEXT NOT NULL,
@@ -134,6 +144,12 @@ CREATE UNIQUE INDEX "Receipt_paymentId_key" ON "Receipt"("paymentId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Receipt_receiptNumber_key" ON "Receipt"("receiptNumber");
+
+-- CreateIndex
+CREATE INDEX "RateLimit_windowStart_idx" ON "RateLimit"("windowStart");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RateLimit_key_windowStart_key" ON "RateLimit"("key", "windowStart");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "HostingSubscription_orderId_key" ON "HostingSubscription"("orderId");

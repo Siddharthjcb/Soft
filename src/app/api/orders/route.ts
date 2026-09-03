@@ -3,11 +3,19 @@ import { Category, OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { computeOrderTotal } from "@/lib/pricing";
 import { jsonError, parseJson, requireApiUser } from "@/lib/api";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { createOrderBody } from "@/lib/schemas";
 
 export async function POST(request: Request) {
   const authed = await requireApiUser();
   if (!authed.ok) return authed.response;
+
+  const limited = await enforceRateLimit({
+    request,
+    userId: authed.user.id,
+    ...LIMITS.createOrder,
+  });
+  if (limited) return limited;
 
   const parsed = await parseJson(createOrderBody, request);
   if (!parsed.ok) return parsed.response;

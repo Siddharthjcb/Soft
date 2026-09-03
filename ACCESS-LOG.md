@@ -96,6 +96,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** `npm install zod`; no DB schema change, no migration
 - **Outside the project:** None
 
+### 9.2 — Rate limiting on public write routes
+- **A** `src/lib/rate-limit.ts`
+- **M** `prisma/schema.prisma` (added `RateLimit` model), `prisma/migrations/20260903000000_init/migration.sql`, `src/app/api/orders/route.ts`, `src/app/api/upload/route.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/app/api/payments/create/route.ts`
+- **Dependencies:** None
+- **Side effects:** init migration + Prisma client regenerated. No new external service — counters live in Postgres
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

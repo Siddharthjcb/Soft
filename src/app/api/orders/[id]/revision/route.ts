@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { jsonError, parseJson, parseParams, requireApiUser } from "@/lib/api";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { orderIdParams, revisionBody } from "@/lib/schemas";
 
 export async function POST(
@@ -10,6 +11,13 @@ export async function POST(
 ) {
   const authed = await requireApiUser();
   if (!authed.ok) return authed.response;
+
+  const limited = await enforceRateLimit({
+    request,
+    userId: authed.user.id,
+    ...LIMITS.revision,
+  });
+  if (limited) return limited;
 
   const p = parseParams(orderIdParams, await params);
   if (!p.ok) return p.response;

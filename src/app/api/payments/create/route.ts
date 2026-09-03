@@ -3,6 +3,7 @@ import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { razorpay } from "@/lib/razorpay";
 import { jsonError, parseJson, requireApiUser } from "@/lib/api";
+import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { createPaymentBody } from "@/lib/schemas";
 
 /**
@@ -12,6 +13,13 @@ import { createPaymentBody } from "@/lib/schemas";
 export async function POST(request: Request) {
   const authed = await requireApiUser();
   if (!authed.ok) return authed.response;
+
+  const limited = await enforceRateLimit({
+    request,
+    userId: authed.user.id,
+    ...LIMITS.createPayment,
+  });
+  if (limited) return limited;
 
   const parsed = await parseJson(createPaymentBody, request);
   if (!parsed.ok) return parsed.response;

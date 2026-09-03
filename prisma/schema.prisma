@@ -124,6 +124,18 @@ model Receipt {
   issuedAt      DateTime @default(now())
 }
 
+/// Fixed-window rate-limit counters. Postgres-backed so there is no extra
+/// service to pay for; expired windows are cleaned up opportunistically.
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([key, windowStart])
+  @@index([windowStart])
+}
+
 model HostingSubscription {
   id              String        @id @default(cuid())
   orderId         String        @unique
