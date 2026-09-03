@@ -173,14 +173,3 @@ export function describeOrderLineItems(
 
   return items;
 }
-
-export function isValidSelections(value: unknown): value is OrderSelections {
-  if (typeof value !== "object" || value === null) return false;
-  const v = value as Record<string, unknown>;
-  const tierOk = [1, 2, 3, 4].includes(v.tier as number);
-  const planOk = DELIVERY_OPTIONS.some((d) => d.id === v.deliveryPlan);
-  const addonsOk =
-    Array.isArray(v.addons) &&
-    v.addons.every((a) => ADDONS.some((x) => x.id === a));
-  return tierOk && planOk && addonsOk;
-}

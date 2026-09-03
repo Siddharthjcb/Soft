@@ -1,29 +1,30 @@
 import { NextResponse } from "next/server";
 import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
 import { HOSTING_MONTHLY_PAISE } from "@/lib/pricing";
+import { jsonError, parseParams, requireApiAdmin } from "@/lib/api";
+import { orderIdParams } from "@/lib/schemas";
 
 /** Create a hosting subscription for a delivered order (one per order). */
 export async function POST(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  await requireAdmin();
-  const { id } = await params;
+  const authed = await requireApiAdmin();
+  if (!authed.ok) return authed.response;
+
+  const p = parseParams(orderIdParams, await params);
+  if (!p.ok) return p.response;
 
   const order = await prisma.order.findUnique({
-    where: { id },
+    where: { id: p.data.id },
     include: { hosting: true },
   });
   if (!order) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    return jsonError(404, "not_found", "Order not found.");
   }
   if (order.status !== OrderStatus.delivered) {
-    return NextResponse.json(
-      { error: "Order must be delivered first" },
-      { status: 409 },
-    );
+    return jsonError(409, "not_delivered", "Order must be delivered first.");
   }
   if (order.hosting) {
     return NextResponse.json({ ok: true, id: order.hosting.id });

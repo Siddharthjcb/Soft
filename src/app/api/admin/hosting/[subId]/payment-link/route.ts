@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
 import { razorpay } from "@/lib/razorpay";
+import { jsonError, parseParams, requireApiAdmin } from "@/lib/api";
+import { subIdParams } from "@/lib/schemas";
 
 /**
  * Generate a one-off Razorpay Payment Link for this month's hosting fee.
@@ -14,18 +15,18 @@ export async function POST(
   _request: Request,
   { params }: { params: Promise<{ subId: string }> },
 ) {
-  await requireAdmin();
-  const { subId } = await params;
+  const authed = await requireApiAdmin();
+  if (!authed.ok) return authed.response;
+
+  const p = parseParams(subIdParams, await params);
+  if (!p.ok) return p.response;
 
   const sub = await prisma.hostingSubscription.findUnique({
-    where: { id: subId },
+    where: { id: p.data.subId },
     include: { order: { include: { user: true } } },
   });
   if (!sub) {
-    return NextResponse.json(
-      { error: "Subscription not found" },
-      { status: 404 },
-    );
+    return jsonError(404, "not_found", "Subscription not found.");
   }
 
   const period = new Date().toISOString().slice(0, 7); // YYYY-MM

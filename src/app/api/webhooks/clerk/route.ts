@@ -3,28 +3,16 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-
-type ClerkEmail = { id: string; email_address: string };
-type ClerkUserData = {
-  id: string;
-  email_addresses?: ClerkEmail[];
-  primary_email_address_id?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  username?: string | null;
-  public_metadata?: { role?: string } | null;
-};
-type ClerkEvent =
-  | { type: "user.created" | "user.updated"; data: ClerkUserData }
-  | { type: "user.deleted"; data: { id: string } }
-  | { type: string; data: Record<string, unknown> };
+import { jsonError } from "@/lib/api";
+import { clerkEventBody, clerkUserData } from "@/lib/schemas";
 
 export async function POST(req: Request) {
   const secret = process.env.CLERK_WEBHOOK_SECRET;
   if (!secret) {
-    return NextResponse.json(
-      { error: "CLERK_WEBHOOK_SECRET not configured" },
-      { status: 500 },
+    return jsonError(
+      500,
+      "not_configured",
+      "CLERK_WEBHOOK_SECRET is not configured.",
     );
   }
 
@@ -34,28 +22,38 @@ export async function POST(req: Request) {
   const svixTimestamp = h.get("svix-timestamp");
   const svixSignature = h.get("svix-signature");
   if (!svixId || !svixTimestamp || !svixSignature) {
-    return NextResponse.json({ error: "missing svix headers" }, { status: 400 });
+    return jsonError(400, "missing_headers", "Missing svix headers.");
   }
 
-  let evt: ClerkEvent;
+  let verified: unknown;
   try {
-    evt = new Webhook(secret).verify(payload, {
+    verified = new Webhook(secret).verify(payload, {
       "svix-id": svixId,
       "svix-timestamp": svixTimestamp,
       "svix-signature": svixSignature,
-    }) as unknown as ClerkEvent;
+    });
   } catch {
-    return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+    return jsonError(400, "invalid_signature", "Signature verification failed.");
   }
 
-  if (evt.type === "user.deleted") {
-    const id = (evt.data as { id?: string }).id;
+  const event = clerkEventBody.safeParse(verified);
+  if (!event.success) {
+    return jsonError(400, "invalid_event", "Unrecognised event payload.");
+  }
+
+  if (event.data.type === "user.deleted") {
+    const id = event.data.data.id;
     if (id) await prisma.user.deleteMany({ where: { clerkId: id } });
     return NextResponse.json({ ok: true });
   }
 
-  if (evt.type === "user.created" || evt.type === "user.updated") {
-    const d = evt.data as ClerkUserData;
+  if (event.data.type === "user.created" || event.data.type === "user.updated") {
+    const parsed = clerkUserData.safeParse(event.data.data);
+    if (!parsed.success) {
+      return jsonError(400, "invalid_event", "Unrecognised user payload.");
+    }
+    const d = parsed.data;
+
     const primary =
       d.email_addresses?.find((e) => e.id === d.primary_email_address_id) ??
       d.email_addresses?.[0];
@@ -72,5 +70,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  return NextResponse.json({ ok: true, ignored: evt.type });
+  return NextResponse.json({ ok: true, ignored: event.data.type });
 }

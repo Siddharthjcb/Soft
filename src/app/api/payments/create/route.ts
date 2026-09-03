@@ -1,38 +1,30 @@
 import { NextResponse } from "next/server";
 import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
 import { razorpay } from "@/lib/razorpay";
+import { jsonError, parseJson, requireApiUser } from "@/lib/api";
+import { createPaymentBody } from "@/lib/schemas";
 
 /**
  * Creates (or reuses) a Razorpay order for an app Order that is still awaiting
  * payment, plus the matching Payment row. Returns what Razorpay Checkout needs.
  */
 export async function POST(request: Request) {
-  const user = await getCurrentUser();
+  const authed = await requireApiUser();
+  if (!authed.ok) return authed.response;
 
-  let body: { orderId?: string };
-  try {
-    body = (await request.json()) as { orderId?: string };
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
-  if (!body.orderId) {
-    return NextResponse.json({ error: "orderId required" }, { status: 400 });
-  }
+  const parsed = await parseJson(createPaymentBody, request);
+  if (!parsed.ok) return parsed.response;
 
   const order = await prisma.order.findUnique({
-    where: { id: body.orderId },
+    where: { id: parsed.data.orderId },
     include: { payments: true },
   });
-  if (!order || order.userId !== user.id) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+  if (!order || order.userId !== authed.user.id) {
+    return jsonError(404, "not_found", "Order not found.");
   }
   if (order.status !== OrderStatus.pending_payment) {
-    return NextResponse.json(
-      { error: "Order is not awaiting payment" },
-      { status: 409 },
-    );
+    return jsonError(409, "not_payable", "Order is not awaiting payment.");
   }
 
   // Reuse an existing pending Razorpay order if one is already attached.
@@ -52,7 +44,7 @@ export async function POST(request: Request) {
     amount: order.priceTotal, // paise
     currency: "INR",
     receipt: order.id,
-    notes: { appOrderId: order.id, userId: user.id },
+    notes: { appOrderId: order.id, userId: authed.user.id },
   });
 
   await prisma.payment.create({

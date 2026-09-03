@@ -5,18 +5,11 @@ import { verifyWebhookSignature } from "@/lib/razorpay";
 import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
 import { renderReceiptPdf } from "@/lib/receipt";
 import { sendOrderConfirmation, sendAdminNewOrder } from "@/lib/email";
+import { jsonError } from "@/lib/api";
+import { razorpayEventBody } from "@/lib/schemas";
 
 // react-pdf needs the Node.js runtime.
 export const runtime = "nodejs";
-
-interface RazorpayWebhook {
-  event: string;
-  payload: {
-    payment?: { entity: { id: string; order_id: string } };
-    order?: { entity: { id: string } };
-    payment_link?: { entity: { id: string } };
-  };
-}
 
 /**
  * Razorpay webhook. On a captured payment / paid order / paid payment link we
@@ -29,15 +22,21 @@ export async function POST(request: Request) {
   const signature = request.headers.get("x-razorpay-signature");
 
   if (!verifyWebhookSignature(raw, signature)) {
-    return NextResponse.json({ error: "invalid signature" }, { status: 400 });
+    return jsonError(400, "invalid_signature", "Signature verification failed.");
   }
 
-  let event: RazorpayWebhook;
+  let parsedJson: unknown;
   try {
-    event = JSON.parse(raw) as RazorpayWebhook;
+    parsedJson = JSON.parse(raw);
   } catch {
-    return NextResponse.json({ error: "invalid JSON" }, { status: 400 });
+    return jsonError(400, "invalid_json", "Body is not valid JSON.");
   }
+
+  const parsed = razorpayEventBody.safeParse(parsedJson);
+  if (!parsed.success) {
+    return jsonError(400, "invalid_event", "Unrecognised event payload.");
+  }
+  const event = parsed.data;
 
   const isPaid =
     event.event === "payment.captured" ||
@@ -53,7 +52,7 @@ export async function POST(request: Request) {
     event.payload.payment_link?.entity.id;
   const razorpayPaymentId = event.payload.payment?.entity.id ?? null;
   if (!razorpayOrderId) {
-    return NextResponse.json({ error: "no order id in payload" }, { status: 400 });
+    return jsonError(400, "missing_reference", "No order reference in payload.");
   }
 
   const payment = await prisma.payment.findUnique({

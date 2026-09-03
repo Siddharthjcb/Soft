@@ -1,51 +1,48 @@
 import { NextResponse } from "next/server";
 import { OrderStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
 import { sendStatusUpdate } from "@/lib/email";
-import { ORDER_STATUSES, statusLabel } from "@/lib/order-display";
+import { statusLabel } from "@/lib/order-display";
+import { jsonError, parseJson, parseParams, requireApiAdmin } from "@/lib/api";
+import { adminUpdateOrderBody, orderIdParams } from "@/lib/schemas";
 
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  await requireAdmin();
-  const { id } = await params;
+  const authed = await requireApiAdmin();
+  if (!authed.ok) return authed.response;
 
-  let body: { status?: string; deliveredUrl?: string };
-  try {
-    body = (await request.json()) as { status?: string; deliveredUrl?: string };
-  } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
-  }
+  const p = parseParams(orderIdParams, await params);
+  if (!p.ok) return p.response;
 
-  const status = body.status as OrderStatus | undefined;
-  if (!status || !ORDER_STATUSES.includes(status)) {
-    return NextResponse.json({ error: "Invalid status" }, { status: 400 });
-  }
+  const parsed = await parseJson(adminUpdateOrderBody, request);
+  if (!parsed.ok) return parsed.response;
+  const { status, deliveredUrl: submittedUrl } = parsed.data;
 
   const order = await prisma.order.findUnique({
-    where: { id },
+    where: { id: p.data.id },
     include: { user: true },
   });
   if (!order) {
-    return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    return jsonError(404, "not_found", "Order not found.");
   }
 
   let deliveredUrl = order.deliveredUrl;
   if (status === OrderStatus.delivered) {
-    const url = (body.deliveredUrl ?? "").trim();
+    const url = submittedUrl ?? "";
     if (!/^https?:\/\/.+/i.test(url)) {
-      return NextResponse.json(
-        { error: "A valid delivered site URL (https://…) is required." },
-        { status: 400 },
+      return jsonError(
+        400,
+        "invalid_delivered_url",
+        "A valid delivered site URL (https://…) is required.",
       );
     }
     deliveredUrl = url;
   }
 
   const updated = await prisma.order.update({
-    where: { id },
+    where: { id: p.data.id },
     data: { status, deliveredUrl },
   });
 
@@ -55,8 +52,7 @@ export async function POST(
         to: order.user.email,
         orderId: order.id,
         statusLabel: statusLabel(status),
-        deliveredUrl:
-          status === OrderStatus.delivered ? deliveredUrl : null,
+        deliveredUrl: status === OrderStatus.delivered ? deliveredUrl : null,
       });
     } catch (err) {
       console.error("[admin] status-update email failed", err);

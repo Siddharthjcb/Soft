@@ -1,6 +1,7 @@
 import { PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/auth";
+import { jsonError, parseParams, requireApiUser } from "@/lib/api";
+import { orderIdParams } from "@/lib/schemas";
 import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
 import { renderReceiptPdf } from "@/lib/receipt";
 
@@ -11,22 +12,25 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = await params;
-  const user = await getCurrentUser();
+  const authed = await requireApiUser();
+  if (!authed.ok) return authed.response;
+
+  const p = parseParams(orderIdParams, await params);
+  if (!p.ok) return p.response;
 
   const order = await prisma.order.findUnique({
-    where: { id },
+    where: { id: p.data.id },
     include: { user: true, payments: { include: { receipt: true } } },
   });
-  if (!order || order.userId !== user.id) {
-    return new Response("Not found", { status: 404 });
+  if (!order || order.userId !== authed.user.id) {
+    return jsonError(404, "not_found", "Order not found.");
   }
 
   const payment = order.payments.find(
-    (p) => p.status === PaymentStatus.success && p.receipt,
+    (pay) => pay.status === PaymentStatus.success && pay.receipt,
   );
   if (!payment?.receipt) {
-    return new Response("No receipt yet", { status: 404 });
+    return jsonError(404, "no_receipt", "No receipt for this order yet.");
   }
 
   const selections: OrderSelections = {

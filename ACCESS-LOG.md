@@ -87,6 +87,17 @@ the project unless called out in the "Outside the project" section at the end.
 
 ---
 
+## Phase 9 — Hardening
+
+### 9.1 — zod validation + consistent error envelope
+- **A** `src/lib/api.ts`, `src/lib/schemas.ts`
+- **M** `src/app/api/orders/route.ts`, `src/app/api/upload/route.ts`, `src/app/api/payments/create/route.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/app/api/orders/[id]/receipt/route.ts`, `src/app/api/admin/orders/[id]/route.ts`, `src/app/api/admin/orders/[id]/hosting/route.ts`, `src/app/api/admin/hosting/[subId]/payment-link/route.ts`, `src/app/api/webhooks/clerk/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/lib/pricing.ts` (removed dead `isValidSelections`), `package.json`, `package-lock.json`
+- **Dependencies:** `zod@4`
+- **Side effects:** `npm install zod`; no DB schema change, no migration
+- **Outside the project:** None
+
+---
+
 ## Outside the project — session of 2026-09-03
 
 Done **before** this logging rule existed. Nothing at OS root; no `sudo` was
