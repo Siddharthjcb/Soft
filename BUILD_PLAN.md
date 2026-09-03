@@ -164,7 +164,7 @@ Anything that cannot be finished without a live service gets a skeleton with a
       Keep DESIGN.md: monochrome, mono labels, no new colours. Confirm
       `npm run build` passes."
 
-- [ ] **10.3** "Customer billing page and SEO. Build `/dashboard/billing`
+- [x] **10.3** "Customer billing page and SEO. Build `/dashboard/billing`
       (it is in the CLAUDE.md route map but unbuilt): payment history with
       amount, type (order/hosting), status and a receipt download link where
       one exists, plus hosting subscription state and next billing date.
