@@ -64,7 +64,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       button that sets status to revision_requested with a note field."
 
 ## Phase 5 — Admin
-- [ ] **5.1** "Build /admin: a list of all orders groupable/filterable by
+- [x] **5.1** "Build /admin: a list of all orders groupable/filterable by
       status, newest first. Build /admin/orders/[id]: full detail view,
       status dropdown (updating it emails the customer via Resend), and a
       field to paste the delivered site URL when marking 'delivered'."
