@@ -70,7 +70,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       field to paste the delivered site URL when marking 'delivered'."
 
 ## Phase 6 — Hosting fee (manual v1)
-- [ ] **6.1** "Add a HostingSubscription model (orderId, monthlyFee,
+- [x] **6.1** "Add a HostingSubscription model (orderId, monthlyFee,
       nextBillingDate, status). Add an admin action to create one for a
       delivered order and to generate a Razorpay Payment Link for that
       month's fee on demand — no automated recurring billing yet, just a
