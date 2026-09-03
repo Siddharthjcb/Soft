@@ -32,6 +32,8 @@ export const subIdParams = z.object({ subId: idSchema });
 // --- POST /api/orders -------------------------------------------------------
 
 export const createOrderBody = z.object({
+  /** client-generated; a resubmit with the same key returns the same order */
+  idempotencyKey: z.string().min(8).max(64).optional(),
   category: categoryIdSchema,
   tier: tierIdSchema,
   deliveryPlan: deliveryPlanSchema,
@@ -52,6 +54,14 @@ export type CreateOrderBody = z.infer<typeof createOrderBody>;
 // --- POST /api/payments/create ----------------------------------------------
 
 export const createPaymentBody = z.object({ orderId: idSchema });
+
+// --- POST /api/payments/verify ----------------------------------------------
+
+export const verifyPaymentBody = z.object({
+  razorpay_order_id: z.string().min(1).max(128),
+  razorpay_payment_id: z.string().min(1).max(128),
+  razorpay_signature: z.string().min(1).max(256),
+});
 
 // --- POST /api/orders/[id]/revision -----------------------------------------
 

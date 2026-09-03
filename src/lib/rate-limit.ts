@@ -14,6 +14,7 @@ export const LIMITS = {
   upload: { bucket: "upload", limit: 30, windowSeconds: 3600 },
   revision: { bucket: "order:revision", limit: 5, windowSeconds: 3600 },
   createPayment: { bucket: "payment:create", limit: 20, windowSeconds: 3600 },
+  verifyPayment: { bucket: "payment:verify", limit: 30, windowSeconds: 3600 },
 } as const;
 
 /**

@@ -15,6 +15,7 @@ import {
   type AddonId,
 } from "@/lib/pricing";
 import { formatINR } from "@/lib/format";
+import { apiErrorMessage } from "@/lib/client-error";
 
 const DRAFT_KEY = "order-draft-v1";
 const TOTAL_STEPS = 5;
@@ -32,6 +33,8 @@ interface Draft {
   addons: AddonId[];
   requirements: string;
   assets: Asset[];
+  /** generated on first submit; reused on retry so a resubmit is a no-op */
+  idempotencyKey: string | null;
 }
 
 const EMPTY: Draft = {
@@ -42,6 +45,7 @@ const EMPTY: Draft = {
   addons: [],
   requirements: "",
   assets: [],
+  idempotencyKey: null,
 };
 
 function loadDraft(): Draft {
@@ -160,12 +164,26 @@ export function OrderForm({ isSignedIn }: { isSignedIn: boolean }) {
       patch({ step: 1 });
       return;
     }
+    // Reuse the key across retries so a resubmit returns the same order.
+    let idempotencyKey = draft.idempotencyKey;
+    if (!idempotencyKey) {
+      idempotencyKey = crypto.randomUUID();
+      const next = { ...draft, idempotencyKey };
+      try {
+        window.sessionStorage.setItem(DRAFT_KEY, JSON.stringify(next));
+      } catch {
+        /* ignore */
+      }
+      setDraft(next);
+    }
+
     setSubmitting(true);
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          idempotencyKey,
           category: draft.category,
           tier: draft.tier,
           deliveryPlan: draft.deliveryPlan,
@@ -179,10 +197,9 @@ export function OrderForm({ isSignedIn }: { isSignedIn: boolean }) {
         return;
       }
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(data?.error ?? "Could not create the order.");
+        throw new Error(
+          await apiErrorMessage(res, "Could not create the order."),
+        );
       }
       const { id } = (await res.json()) as { id: string };
       try {

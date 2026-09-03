@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { apiErrorMessage } from "@/lib/client-error";
 
 export function RevisionRequest({ orderId }: { orderId: string }) {
   const router = useRouter();
@@ -25,10 +26,9 @@ export function RevisionRequest({ orderId }: { orderId: string }) {
         body: JSON.stringify({ note }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(d?.error ?? "Could not submit the request.");
+        throw new Error(
+          await apiErrorMessage(res, "Could not submit the request."),
+        );
       }
       setDone(true);
       router.refresh();

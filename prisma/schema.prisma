@@ -72,6 +72,8 @@ model User {
 
 model Order {
   id               String       @id @default(cuid())
+  /// client-supplied key so a double-submitted order form is a no-op
+  idempotencyKey   String?      @unique
   userId           String
   user             User         @relation(fields: [userId], references: [id])
   category         Category

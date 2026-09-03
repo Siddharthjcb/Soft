@@ -145,6 +145,11 @@ export function computeOrderTotal(sel: OrderSelections): number {
   return (tier?.pricePaise ?? 0) + (delivery?.surchargePaise ?? 0) + addonTotal;
 }
 
+/** Working days promised for each delivery plan — used to set Order.deadlineDate. */
+export function deliveryDays(plan: DeliveryPlanId): number {
+  return plan === "rush_2_day" ? 2 : 7;
+}
+
 /** Human-readable line items for a receipt / order summary. */
 export function describeOrderLineItems(
   sel: OrderSelections,

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/format";
+import { apiErrorMessage } from "@/lib/client-error";
 
 interface Subscription {
   id: string;
@@ -33,10 +34,9 @@ export function HostingControls({
         method: "POST",
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(d?.error ?? "Could not create the subscription.");
+        throw new Error(
+          await apiErrorMessage(res, "Could not create the subscription."),
+        );
       }
       router.refresh();
     } catch (e) {
@@ -56,12 +56,13 @@ export function HostingControls({
         `/api/admin/hosting/${subscription.id}/payment-link`,
         { method: "POST" },
       );
-      const d = (await res.json().catch(() => null)) as
-        | { url?: string; error?: string }
-        | null;
-      if (!res.ok || !d?.url) {
-        throw new Error(d?.error ?? "Could not generate the link.");
+      if (!res.ok) {
+        throw new Error(
+          await apiErrorMessage(res, "Could not generate the link."),
+        );
       }
+      const d = (await res.json().catch(() => null)) as { url?: string } | null;
+      if (!d?.url) throw new Error("Could not generate the link.");
       setLink(d.url);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");

@@ -42,6 +42,7 @@ CREATE TABLE "User" (
 -- CreateTable
 CREATE TABLE "Order" (
     "id" TEXT NOT NULL,
+    "idempotencyKey" TEXT,
     "userId" TEXT NOT NULL,
     "category" "Category" NOT NULL,
     "tier" INTEGER NOT NULL,
@@ -143,6 +144,9 @@ CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Order_idempotencyKey_key" ON "Order"("idempotencyKey");
 
 -- CreateIndex
 CREATE INDEX "Order_userId_idx" ON "Order"("userId");

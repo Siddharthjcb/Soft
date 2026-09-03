@@ -21,6 +21,23 @@ export async function POST(request: Request) {
   if (!parsed.ok) return parsed.response;
   const body = parsed.data;
 
+  // Same key => same order. Protects against a double-submitted form.
+  if (body.idempotencyKey) {
+    const existing = await prisma.order.findUnique({
+      where: { idempotencyKey: body.idempotencyKey },
+    });
+    if (existing) {
+      if (existing.userId !== authed.user.id) {
+        return jsonError(409, "key_conflict", "That request key is already in use.");
+      }
+      return NextResponse.json({
+        id: existing.id,
+        priceTotal: existing.priceTotal,
+        deduplicated: true,
+      });
+    }
+  }
+
   // Never trust a client-sent total — recompute from the catalog.
   const priceTotal = computeOrderTotal({
     tier: body.tier,
@@ -33,6 +50,7 @@ export async function POST(request: Request) {
 
   const order = await prisma.order.create({
     data: {
+      idempotencyKey: body.idempotencyKey ?? null,
       userId: authed.user.id,
       category: body.category as Category,
       tier: body.tier,

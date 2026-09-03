@@ -5,6 +5,13 @@ import Script from "next/script";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/format";
+import { apiErrorMessage } from "@/lib/client-error";
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
 
 interface RazorpayOptions {
   key: string;
@@ -14,7 +21,7 @@ interface RazorpayOptions {
   name: string;
   description?: string;
   theme?: { color?: string };
-  handler: () => void;
+  handler: (response: RazorpayResponse) => void;
   modal?: { ondismiss?: () => void };
 }
 
@@ -35,7 +42,28 @@ export function PayButton({
   const [loading, setLoading] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [pendingConfirmation, setPendingConfirmation] = useState(false);
+
+  /**
+   * Confirm straight from the Checkout callback so the customer is not left
+   * waiting on webhook delivery. If this call fails the payment still went
+   * through — the webhook settles it — so we fall back to a waiting state.
+   */
+  async function confirmPayment(response: RazorpayResponse) {
+    try {
+      const res = await fetch("/api/payments/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(response),
+      });
+      if (!res.ok) throw new Error("verification failed");
+      router.replace(`/dashboard/orders/${orderId}`);
+      router.refresh();
+    } catch {
+      setPendingConfirmation(true);
+      setLoading(false);
+    }
+  }
 
   async function pay() {
     setError(null);
@@ -51,10 +79,7 @@ export function PayButton({
         body: JSON.stringify({ orderId }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(d?.error ?? "Could not start payment.");
+        throw new Error(await apiErrorMessage(res, "Could not start payment."));
       }
       const data = (await res.json()) as {
         razorpayOrderId: string;
@@ -72,7 +97,7 @@ export function PayButton({
         name: "Website Ordering Platform",
         description: `Order ${orderId}`,
         theme: { color: "#0a0a0a" },
-        handler: () => setDone(true),
+        handler: (response) => void confirmPayment(response),
         modal: { ondismiss: () => setLoading(false) },
       });
       rzp.open();
@@ -82,16 +107,14 @@ export function PayButton({
     }
   }
 
-  if (done) {
+  if (pendingConfirmation) {
     return (
       <div className="flex flex-col gap-4">
         <p className="text-base leading-relaxed text-ink">
-          Payment received. We&rsquo;re confirming it now — your order moves to
-          the queue automatically once confirmed.
+          Payment received. We&rsquo;re still confirming it — your order moves
+          to the queue automatically, usually within a minute.
         </p>
-        <Button onClick={() => router.push("/dashboard")}>
-          Go to dashboard
-        </Button>
+        <Button onClick={() => router.refresh()}>Check again</Button>
       </div>
     );
   }

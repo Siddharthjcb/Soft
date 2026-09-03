@@ -1,22 +1,17 @@
 import { NextResponse } from "next/server";
-import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
-import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/razorpay";
-import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
-import { renderReceiptPdf } from "@/lib/receipt";
-import { sendOrderConfirmation, sendAdminNewOrder } from "@/lib/email";
+import { settleOrderPayment } from "@/lib/payments";
 import { jsonError } from "@/lib/api";
 import { claimWebhookEvent, isStaleEvent } from "@/lib/webhook";
 import { razorpayEventBody } from "@/lib/schemas";
 
-// react-pdf needs the Node.js runtime.
+// settleOrderPayment renders a PDF receipt (react-pdf).
 export const runtime = "nodejs";
 
 /**
- * Razorpay webhook. On a captured payment / paid order / paid payment link we
- * mark the Payment row success. For an order payment we also flip the Order
- * pending_payment -> new; for a hosting payment link we advance the
- * subscription's nextBillingDate by a month. Idempotent.
+ * Razorpay webhook. Verifies the signature, rejects stale events, claims the
+ * event id once, then hands off to the shared settlement path — the same one
+ * /api/payments/verify uses. Whichever arrives first wins.
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -44,19 +39,6 @@ export async function POST(request: Request) {
     return jsonError(400, "stale_event", "Event timestamp is outside the window.");
   }
 
-  // Claim the event id so a retry or replay is a no-op.
-  const eventId =
-    request.headers.get("x-razorpay-event-id") ??
-    event.payload.payment?.entity.id ??
-    event.payload.payment_link?.entity.id ??
-    event.payload.order?.entity.id;
-  if (!eventId) {
-    return jsonError(400, "missing_event_id", "No event id on the request.");
-  }
-  if (!(await claimWebhookEvent("razorpay", `${event.event}:${eventId}`))) {
-    return NextResponse.json({ ok: true, alreadyProcessed: true });
-  }
-
   const isPaid =
     event.event === "payment.captured" ||
     event.event === "order.paid" ||
@@ -74,106 +56,17 @@ export async function POST(request: Request) {
     return jsonError(400, "missing_reference", "No order reference in payload.");
   }
 
-  const payment = await prisma.payment.findUnique({
-    where: { razorpayOrderId },
-    include: { order: true },
-  });
-  if (!payment) {
-    // Unknown reference — ack so Razorpay stops retrying.
-    return NextResponse.json({ ok: true, unknown: razorpayOrderId });
-  }
-  if (payment.status === PaymentStatus.success) {
+  // Claim the event id so a retry or replay is a no-op.
+  const eventId = request.headers.get("x-razorpay-event-id") ?? razorpayOrderId;
+  if (!(await claimWebhookEvent("razorpay", `${event.event}:${eventId}`))) {
     return NextResponse.json({ ok: true, alreadyProcessed: true });
   }
 
-  await prisma.$transaction([
-    prisma.payment.update({
-      where: { id: payment.id },
-      data: { status: PaymentStatus.success, razorpayPaymentId },
-    }),
-    prisma.order.update({
-      where: { id: payment.orderId },
-      data:
-        payment.order.status === OrderStatus.pending_payment
-          ? { status: OrderStatus.new }
-          : {},
-    }),
-  ]);
+  const result = await settleOrderPayment({
+    razorpayOrderId,
+    razorpayPaymentId,
+  });
 
-  // Hosting payment: roll the subscription's next billing date forward.
-  if (payment.type === PaymentType.hosting) {
-    const sub = await prisma.hostingSubscription.findUnique({
-      where: { orderId: payment.orderId },
-    });
-    if (sub) {
-      const next = new Date(sub.nextBillingDate);
-      next.setMonth(next.getMonth() + 1);
-      await prisma.hostingSubscription.update({
-        where: { id: sub.id },
-        data: { nextBillingDate: next },
-      });
-    }
-    return NextResponse.json({ ok: true, hosting: true });
-  }
-
-  // Order payment: receipt + emails. Best-effort — a mail failure must not
-  // fail the webhook (the payment is already recorded, no reprocessing).
-  try {
-    const receiptNumber = `RCPT-${new Date()
-      .toISOString()
-      .slice(0, 10)
-      .replace(/-/g, "")}-${payment.id.slice(-6).toUpperCase()}`;
-
-    const receipt = await prisma.receipt.upsert({
-      where: { paymentId: payment.id },
-      update: {},
-      create: { paymentId: payment.id, receiptNumber },
-    });
-
-    const order = await prisma.order.findUnique({
-      where: { id: payment.orderId },
-      include: { user: true },
-    });
-
-    if (order) {
-      const selections: OrderSelections = {
-        tier: order.tier as OrderSelections["tier"],
-        deliveryPlan: order.deliveryPlan,
-        addons: Array.isArray(order.addons)
-          ? (order.addons as OrderSelections["addons"])
-          : [],
-      };
-      const lineItems = describeOrderLineItems(selections);
-
-      const pdf = await renderReceiptPdf({
-        receiptNumber: receipt.receiptNumber,
-        issuedAt: receipt.issuedAt,
-        orderId: order.id,
-        customerName: order.user.name,
-        customerEmail: order.user.email,
-        lineItems,
-        totalPaise: order.priceTotal,
-        razorpayPaymentId,
-      });
-
-      await sendOrderConfirmation({
-        to: order.user.email,
-        orderId: order.id,
-        receiptNumber: receipt.receiptNumber,
-        totalPaise: order.priceTotal,
-        pdf,
-      });
-      await sendAdminNewOrder({
-        orderId: order.id,
-        category: order.category,
-        tier: order.tier,
-        totalPaise: order.priceTotal,
-        customerEmail: order.user.email,
-      });
-    }
-  } catch (err) {
-    console.error("[razorpay webhook] receipt/email failed", err);
-  }
-
-  return NextResponse.json({ ok: true });
+  // Unknown references are acked so Razorpay stops retrying.
+  return NextResponse.json({ ok: true, settled: result.status });
 }

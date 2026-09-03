@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { OrderStatus } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { ORDER_STATUSES, STATUS_LABELS } from "@/lib/order-display";
+import { apiErrorMessage } from "@/lib/client-error";
 
 export function AdminOrderControls({
   orderId,
@@ -33,10 +34,7 @@ export function AdminOrderControls({
         body: JSON.stringify({ status, deliveredUrl }),
       });
       if (!res.ok) {
-        const d = (await res.json().catch(() => null)) as
-          | { error?: string }
-          | null;
-        throw new Error(d?.error ?? "Could not save.");
+        throw new Error(await apiErrorMessage(res, "Could not save."));
       }
       setSaved(
         status === currentStatus

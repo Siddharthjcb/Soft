@@ -112,6 +112,17 @@ the project unless called out in the "Outside the project" section at the end.
 
 ---
 
+## Phase 10 — Reliability & operations
+
+### 10.1 — Payment reliability + order integrity
+- **A** `src/lib/payments.ts`, `src/lib/client-error.ts`, `src/app/api/payments/verify/route.ts`
+- **M** `prisma/schema.prisma` (added `Order.idempotencyKey`), `prisma/migrations/20260903000000_init/migration.sql`, `src/lib/pricing.ts`, `src/lib/razorpay.ts`, `src/lib/schemas.ts`, `src/lib/rate-limit.ts`, `src/app/api/orders/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/components/order/order-form.tsx`, `src/components/order/pay-button.tsx`, `src/components/order/revision-request.tsx`, `src/components/admin/admin-order-controls.tsx`, `src/components/admin/hosting-controls.tsx`
+- **Dependencies:** None
+- **Side effects:** init migration + Prisma client regenerated
+- **Outside the project:** None
+
+---
+
 ## Outside the project — session of 2026-09-03
 
 Done **before** this logging rule existed. Nothing at OS root; no `sudo` was
