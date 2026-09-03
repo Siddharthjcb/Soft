@@ -154,7 +154,7 @@ Anything that cannot be finished without a live service gets a skeleton with a
       PayButton to call verify then route to the order page. Confirm
       `npm run build` passes."
 
-- [ ] **10.2** "Admin operations upgrade. Add an overview strip to `/admin`:
+- [x] **10.2** "Admin operations upgrade. Add an overview strip to `/admin`:
       counts per status, orders awaiting action (new + revision_requested),
       and this month's settled revenue — all from one grouped query. Add a
       search box filtering by order id or customer email (query param, server
