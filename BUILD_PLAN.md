@@ -280,7 +280,7 @@ and stay untouched in the dashboard. Never change the root token values.
       layout. Mount TrustMark. Wrap headings in `<SetType>` and section rules
       in `<DrawRule>`. Confirm build."
 
-- [ ] **12.7** "Bring `/pricing` and `/portfolio` into the system, add the
+- [x] **12.7** "Bring `/pricing` and `/portfolio` into the system, add the
       dismissible mobile sticky CTA (safe-area aware, appears after the hero),
       then a full responsive and reduced-motion pass down to 360px. Verify no
       horizontal overflow, that the dashboard and admin are visually unchanged,

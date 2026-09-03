@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { StickyCta } from "@/components/sticky-cta";
 
 /**
  * Everything public renders on the editorial surface. `data-surface` is what
@@ -16,6 +17,7 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
       <SiteHeader />
       <div className="relative flex-1">{children}</div>
       <SiteFooter />
+      <StickyCta />
     </div>
   );
 }

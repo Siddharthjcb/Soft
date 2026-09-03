@@ -19,21 +19,18 @@ test.describe("public pages", () => {
 
     await expect(
       page.getByRole("heading", {
-        name: "Order a website. Pay online. Track it to delivery.",
+        name: /A website for the business you actually run/,
       }),
     ).toBeVisible();
 
+    // the primary free-trial tile leads the grid
     await expect(
-      page.getByRole("heading", { name: "Four tiers, one flat price each" }),
+      page.getByRole("heading", { name: "Make it yourself" }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Built for four kinds of work" }),
-    ).toBeVisible();
+    await expect(page.getByText("Free to start", { exact: true })).toBeVisible();
 
-    // Four tier cards, each showing a rupee amount.
-    for (const tier of ["Tier 1", "Tier 2", "Tier 3", "Tier 4"]) {
-      await expect(page.getByText(tier, { exact: true }).first()).toBeVisible();
-    }
+    // the commissioned tiers are present but secondary
+    await expect(page.getByText("Or we build it for you", { exact: true })).toBeVisible();
     await expect(page.getByText(/₹[\d,]+/).first()).toBeVisible();
   });
 
@@ -43,7 +40,7 @@ test.describe("public pages", () => {
     const heroCta = page
       .locator("section")
       .first()
-      .getByRole("link", { name: "Start an order" });
+      .getByRole("link", { name: /Try it/ });
     await expect(heroCta).toHaveCount(1);
     await expect(heroCta).toHaveAttribute("href", "/order/new");
   });
@@ -52,14 +49,10 @@ test.describe("public pages", () => {
     await page.goto("/pricing");
 
     await expect(
-      page.getByRole("heading", { name: "Flat tier prices, clear add-ons" }),
+      page.getByRole("heading", { name: /Start free/ }),
     ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Choose how fast you need it" }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("heading", { name: "Optional extras" }),
-    ).toBeVisible();
+    await expect(page.getByText("Delivery speed", { exact: true })).toBeVisible();
+    await expect(page.getByText("Add-ons", { exact: true })).toBeVisible();
     await expect(page.getByText("Extra customization")).toBeVisible();
     await expect(page.getByText("Security hardening")).toBeVisible();
   });
@@ -78,6 +71,26 @@ test.describe("public pages", () => {
     await expect(page).toHaveURL(/\/pricing$/);
     await page.getByRole("link", { name: "Work" }).first().click();
     await expect(page).toHaveURL(/\/portfolio$/);
+  });
+});
+
+test.describe("the Mark", () => {
+  test("appears once, and opens the transparency panel", async ({ page }) => {
+    await page.goto("/");
+    const mark = page.getByRole("button", { expanded: false }).first();
+    await expect(mark).toBeVisible({ timeout: 6000 });
+
+    await mark.click();
+    await expect(
+      page.getByRole("heading", { name: "Who's actually behind this" }),
+    ).toBeVisible();
+    await expect(page.getByText("Things we will never do")).toBeVisible();
+
+    // closes on Escape rather than trapping the visitor
+    await page.keyboard.press("Escape");
+    await expect(
+      page.getByRole("heading", { name: "Who's actually behind this" }),
+    ).toHaveCount(0);
   });
 });
 

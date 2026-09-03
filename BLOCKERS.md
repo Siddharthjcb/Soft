@@ -96,6 +96,16 @@ no longer touch Clerk at all, and their 8 e2e tests pass.
 **To close:** set real Clerk keys (B-02), then run
 `E2E_CLERK=1 npm run test:e2e` and add `E2E_CLERK: "1"` to the CI job env.
 
+## VIS-B4 — Tier 1 is shown as free but priced at ₹4,999 in data · `open`
+The marketing surface now presents Tier 1 as the free self-serve offer, while
+`src/lib/pricing.ts` still carries `pricePaise: 499900` for it — which
+`computeOrderTotal` and the order flow still use. Deliberately not changed
+here: dropping it to zero silently alters payment maths and the settlement
+tests.
+**To close:** decide whether self-serve leaves the tier ladder entirely (likely
+— it is a different product now) and reconcile `pricing.ts`, `computeOrderTotal`
+and the order form together. Ties to Fork E in `docs/DESIGN-DIRECTION.md`.
+
 ## B-10 — Next 16 deprecates `middleware.ts` · `open`
 Build warns that the convention is now `proxy.ts`. Kept as `middleware.ts`
 because that is what Clerk documents.

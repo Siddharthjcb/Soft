@@ -228,6 +228,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change)
 - **Outside the project:** None
 
+### VIS-12.7 — Pricing, portfolio, sticky CTA, e2e
+- **A** `src/components/sticky-cta.tsx`
+- **M** `src/app/(marketing)/pricing/page.tsx`, `src/app/(marketing)/portfolio/page.tsx`, `src/app/(marketing)/layout.tsx`, `e2e/smoke.spec.ts`, `BLOCKERS.md` (added VIS-B4)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03
