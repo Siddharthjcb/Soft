@@ -89,3 +89,46 @@ Reserved for whatever broke, plus your first real category template
 (build the actual portfolio/restaurant template outside this codebase, as a
 separate delivery project — see CLAUDE.md: this platform doesn't generate
 sites, it takes orders for them).
+
+## Phase 9 — Hardening (v1.1)
+
+Three headless modules, run in order on the `claude` branch. 9.2 and 9.3 add
+tables; while there is still no live database they regenerate the single init
+migration (as earlier phases did). If the DB is already migrated by the time
+these run, generate real additive migrations with `prisma migrate dev` instead.
+
+- [ ] **9.1** "Add request validation to every API route. Install zod. Create
+      `src/lib/api.ts` with `jsonError(status, code, message)` returning a
+      consistent `{ error: { code, message } }` envelope, and
+      `parseJson(schema, request)` / `parseParams(schema, params)` helpers built
+      on zod. Write schemas for the body and params of every route under
+      `src/app/api` (orders, upload, payments/create, orders/[id]/revision,
+      orders/[id]/receipt, admin/orders/[id], admin/orders/[id]/hosting,
+      admin/hosting/[subId]/payment-link, webhooks/clerk, webhooks/razorpay)
+      and replace the ad-hoc `JSON.parse` + manual checks. Preserve existing
+      status codes where sensible. Do NOT change the DB schema. Confirm
+      `npm run build` passes."
+
+- [ ] **9.2** "Add fixed-window rate limiting to the public write routes: POST
+      `/api/orders`, POST `/api/upload`, POST `/api/orders/[id]/revision`, POST
+      `/api/payments/create`. Add a `RateLimit` model to `schema.prisma`
+      (id, key, windowStart DateTime, count Int, `@@unique([key, windowStart])`)
+      and regenerate the migration. `src/lib/rate-limit.ts`:
+      `rateLimit(key, limit, windowSeconds)` keyed by Clerk `userId` when
+      present else client IP (`x-forwarded-for`), atomic upsert+increment,
+      returning `{ ok, retryAfter }`. On exceed, return 429 with a
+      `Retry-After` header via the `jsonError` envelope. No new external
+      service. Confirm `npm run build` passes."
+
+- [ ] **9.3** "Replace the single `Order.revisionNote` with a `RevisionRequest`
+      model (id, orderId, note, createdAt, status `open` | `addressed`).
+      Add a `ProcessedWebhookEvent` model (provider, eventId,
+      `@@unique([provider, eventId])`, processedAt). Regenerate the migration.
+      Update POST `/api/orders/[id]/revision` to append a row (not overwrite)
+      and keep the `-> revision_requested` transition. Show the full revision
+      history newest-first on `/dashboard/orders/[id]` and
+      `/admin/orders/[id]`. Harden both webhooks: reject events whose timestamp
+      (`svix-timestamp` for Clerk, `payload` created_at / event time for
+      Razorpay) is more than 5 minutes old, and skip events already in
+      `ProcessedWebhookEvent`. Drop the unused `revisionNote` column and its
+      CLAUDE.md reference. Confirm `npm run build` passes."
