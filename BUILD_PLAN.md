@@ -109,7 +109,7 @@ these run, generate real additive migrations with `prisma migrate dev` instead.
       status codes where sensible. Do NOT change the DB schema. Confirm
       `npm run build` passes."
 
-- [ ] **9.2** "Add fixed-window rate limiting to the public write routes: POST
+- [x] **9.2** "Add fixed-window rate limiting to the public write routes: POST
       `/api/orders`, POST `/api/upload`, POST `/api/orders/[id]/revision`, POST
       `/api/payments/create`. Add a `RateLimit` model to `schema.prisma`
       (id, key, windowStart DateTime, count Int, `@@unique([key, windowStart])`)
