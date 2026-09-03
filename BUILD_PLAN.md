@@ -138,7 +138,7 @@ these run, generate real additive migrations with `prisma migrate dev` instead.
 Anything that cannot be finished without a live service gets a skeleton with a
 `// BLOCKED(B-nn):` comment and an entry in `BLOCKERS.md` — never a guess.
 
-- [ ] **10.1** "Payment reliability and order integrity. Extract the payment
+- [x] **10.1** "Payment reliability and order integrity. Extract the payment
       settlement logic (mark Payment success, flip Order pending_payment ->
       new, set deadlineDate, create the Receipt, send customer + admin email)
       out of the Razorpay webhook into `src/lib/payments.ts`
