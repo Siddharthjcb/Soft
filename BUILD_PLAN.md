@@ -21,7 +21,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       into your repo's `.claude/skills/`
 
 ## Phase 1 — Foundation
-- [ ] **1.1** "Set up a Next.js 14+ App Router TypeScript project with Tailwind
+- [x] **1.1** "Set up a Next.js 14+ App Router TypeScript project with Tailwind
       configured using the tokens in DESIGN.md (colors, font stack, radius).
       Add Prisma with a Postgres datasource. Create the schema from the data
       model in CLAUDE.md (User, Order, Asset, Payment, Receipt) and run the
