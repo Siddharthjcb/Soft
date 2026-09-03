@@ -122,3 +122,36 @@ export const ADDONS: AddonOption[] = [
 
 /** Recurring hosting/maintenance, billed monthly. Manual for v1 (BUILD_PLAN Phase 6). */
 export const HOSTING_MONTHLY_PAISE = 49900;
+
+/** A customer's choices in the order flow. */
+export interface OrderSelections {
+  tier: TierId;
+  deliveryPlan: DeliveryPlanId;
+  addons: AddonId[];
+}
+
+/**
+ * Total for an order, in integer paise. Add-on amounts are baselines ("from");
+ * for Tier 4 the tier price is also a baseline. The order summary makes this
+ * clear before payment.
+ */
+export function computeOrderTotal(sel: OrderSelections): number {
+  const tier = TIERS.find((t) => t.id === sel.tier);
+  const delivery = DELIVERY_OPTIONS.find((d) => d.id === sel.deliveryPlan);
+  const addonTotal = sel.addons.reduce((sum, id) => {
+    const addon = ADDONS.find((a) => a.id === id);
+    return sum + (addon?.fromPaise ?? 0);
+  }, 0);
+  return (tier?.pricePaise ?? 0) + (delivery?.surchargePaise ?? 0) + addonTotal;
+}
+
+export function isValidSelections(value: unknown): value is OrderSelections {
+  if (typeof value !== "object" || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const tierOk = [1, 2, 3, 4].includes(v.tier as number);
+  const planOk = DELIVERY_OPTIONS.some((d) => d.id === v.deliveryPlan);
+  const addonsOk =
+    Array.isArray(v.addons) &&
+    v.addons.every((a) => ADDONS.some((x) => x.id === a));
+  return tierOk && planOk && addonsOk;
+}
