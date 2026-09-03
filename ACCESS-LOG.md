@@ -168,6 +168,17 @@ the project unless called out in the "Outside the project" section at the end.
 
 ---
 
+## SG — SiteGen (instant template sites)
+
+### SG-0 — Architecture draft
+- **A** `docs/ARCHITECTURE-SITEGEN.md`, `screenshots/` (gitignored review artifacts)
+- **M** `.gitignore`
+- **Dependencies:** None
+- **Side effects:** None — planning only, no code, no schema change
+- **Outside the project:** None
+
+---
+
 ## Outside the project — session of 2026-09-03
 
 Done **before** this logging rule existed. Nothing at OS root; no `sudo` was
