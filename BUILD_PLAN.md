@@ -201,3 +201,88 @@ Closes B-09. Nothing was verified beyond compiling.
       running total updating; /dashboard and /admin redirect an anonymous
       visitor to sign-in. Run against `next build && next start` with the
       placeholder env. Add to CI only if it stays under ~2 minutes."
+
+## Phase 12 — Visual identity: "The Broadsheet" (v2.0) · ref `VIS`
+
+Implements `docs/DESIGN-DIRECTION.md` (accepted). Marketing/public surfaces
+only — dashboard and admin stay monochrome-functional.
+
+**Architectural note that governs every task below:** the new palette is applied
+by *scope*, not by replacing tokens globally. The `(marketing)` layout carries
+`data-surface="editorial"`, and `globals.css` redefines the `--color-*`,
+`--radius-*` and font vars under `[data-surface="editorial"]`. Existing
+components (Button, Container) therefore restyle themselves inside marketing
+and stay untouched in the dashboard. Never change the root token values.
+
+- [ ] **12.1** "Rewrite `DESIGN.md` from `docs/DESIGN-DIRECTION.md` (terracotta
+      system, warm paper/ink, square geometry, motion language). In
+      `globals.css`, add a `[data-surface=\"editorial\"]` scope redefining
+      `--color-paper/ink/muted/border/surface/faint`, a new `--color-clay`,
+      `--color-clay-fired`, `--color-clay-blush`, and `--radius-*` to 0 (square
+      identity), for both light and dark. Add Bricolage Grotesque (display) and
+      Anek Latin (body) via `next/font/google` with `display: swap`, exposed as
+      `--font-display` and `--font-sans` inside the scope only. Add
+      `data-surface=\"editorial\"` to the (marketing) layout. Do NOT touch root
+      token values or any dashboard/admin page. Confirm `npm run build` passes
+      and the dashboard still renders monochrome."
+
+- [ ] **12.2** "Motion foundation. Install `gsap`. Create
+      `src/components/motion/` with: `<SetType>` (fade up 8px + variable-font
+      weight settling from 480 to target over 500ms on scroll-in) and
+      `<DrawRule>` (a hairline that animates width 0->100% on enter). Both use
+      GSAP ScrollTrigger, both are no-ops under `prefers-reduced-motion`
+      (render final state immediately), both clean up on unmount. Add an
+      ink-press interaction to the Button primitive inside the editorial scope
+      only: hover deepens to clay-fired + translateY(1px). Confirm build."
+
+- [ ] **12.3** "`<LanguageCycle>` + `src/lib/languages.ts`. Twelve entries
+      (Hindi, Bengali, Tamil, Telugu, Malayalam, Kannada, Gujarati, Punjabi,
+      Odia, Marathi, Assamese, Urdu) each with script id, `next/font/google`
+      family, and two phrases (`welcome`, `begin`). Load the Indic faces with
+      `preload: false` so they never block first paint. The component
+      crossfades + rises 6px over 420ms with a ~3.8s hold, accepts an `offset`
+      prop so two instances never change together, pauses on
+      `document.hidden`, and under `prefers-reduced-motion` or
+      `navigator.connection.saveData` renders one script statically (prefer the
+      viewer's regional script from `navigator.language`, else Devanagari).
+      Mark every translation `// VIS-B1: needs native-speaker review`. Unit-test
+      the selection and offset logic. Confirm build."
+
+- [ ] **12.4** "`<TrustMark>` + `useTrustContext()` +
+      `src/lib/trust-mark.ts`. Config exports a line pool per context
+      (`arrive | browsing | near-cta | signing-up | returning`) plus the
+      transparency-panel content (people, promises, href) — all data, no JSX.
+      The hook derives context from scroll depth, time on page, a CTA section
+      in view, and `localStorage` for returning visitors. The mark is a fixture:
+      bottom-left fixed on desktop, rendered inline in the flow on mobile;
+      fades in once ~2s after load and never pulses or re-animates; text swaps
+      silently on context change; click expands an inline transparency panel
+      (no modal, no dimming, no focus trap) that is keyboard-accessible and
+      dismissible on Escape. Use `[REAL NAME]` placeholders and log VIS-B2.
+      Confirm build."
+
+- [ ] **12.5** "`<TierGrid>`. A 12-column modular grid: the primary tile spans
+      columns 1-7 and rows 1-3, filled with clay-blush, clay border, carrying
+      the trial CTA and the page's only shadow; three secondary tiles at
+      columns 9-12, hairline borders on raised paper, deliberately not
+      top-aligned with the primary. 40px gutters. Square corners. Tile borders
+      draw in on scroll with a 20ms stagger; hover thickens the border to 2px
+      clay and advances the arrow 4px. Below `md` it collapses to the primary
+      tile plus a three-row index. Tier data comes from `src/lib/pricing.ts`.
+      Confirm build."
+
+- [ ] **12.6** "Rebuild the home page in the new system: hero (LanguageCycle
+      eyebrow, display headline with one clay word, subline, trial CTA with its
+      reassurance line), TierGrid, categories as an editorial two-column list,
+      closing section (manifesto + offset LanguageCycle + final CTA), and
+      reworked SiteHeader/SiteFooter. All CTA copy, target and supporting lines
+      come from a new `src/lib/cta.ts` so the funnel iterates without touching
+      layout. Mount TrustMark. Wrap headings in `<SetType>` and section rules
+      in `<DrawRule>`. Confirm build."
+
+- [ ] **12.7** "Bring `/pricing` and `/portfolio` into the system, add the
+      dismissible mobile sticky CTA (safe-area aware, appears after the hero),
+      then a full responsive and reduced-motion pass down to 360px. Verify no
+      horizontal overflow, that the dashboard and admin are visually unchanged,
+      and that hero-interactive JS stays under the budget. Update the Playwright
+      smoke tests for the new markup and capture screenshots. Confirm build."
