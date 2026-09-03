@@ -187,7 +187,7 @@ Closes B-09. Nothing was verified beyond compiling.
       length, unconfigured), `isStaleEvent` replay window, every zod schema's
       accept/reject cases, and `apiErrorMessage` envelope parsing."
 
-- [ ] **11.2** "Behavioural tests for the settlement path with a mocked Prisma
+- [x] **11.2** "Behavioural tests for the settlement path with a mocked Prisma
       client: `settleOrderPayment` marks a payment success exactly once under
       concurrent calls, flips a pending order to `new`, sets `deadlineDate`
       from the delivery plan, rolls a hosting subscription forward instead of

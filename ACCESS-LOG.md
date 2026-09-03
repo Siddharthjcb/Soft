@@ -146,6 +146,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change)
 - **Outside the project:** None
 
+### 11.2 — Behavioural tests with a mocked Prisma
+- **A** `src/lib/payments.test.ts`, `src/lib/rate-limit.test.ts`
+- **M** `BUILD_PLAN.md`, `BLOCKERS.md`
+- **Dependencies:** None
+- **Side effects:** None (no schema change; Prisma, react-pdf and Resend are all mocked — no service is contacted)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

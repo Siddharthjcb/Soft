@@ -63,9 +63,9 @@ permission to publish).
 Vitest is set up and runs in CI; 49 unit tests cover pricing maths, INR
 formatting, Razorpay signature verification, the webhook replay window, every
 zod schema, and API error parsing (task 11.1).
-**Still open:** behavioural tests against a mocked Prisma (settlement
-idempotency, rate-limit windows, order idempotency key) — task 11.2 — and a
-Playwright smoke run over the credential-free surfaces — task 11.3.
+**Still open:** a Playwright smoke run over the credential-free surfaces —
+task 11.3. Mocked-Prisma behaviour tests (settlement idempotency, rate-limit
+windows) landed in 11.2.
 
 ## B-10 — Next 16 deprecates `middleware.ts` · `open`
 Build warns that the convention is now `proxy.ts`. Kept as `middleware.ts`
