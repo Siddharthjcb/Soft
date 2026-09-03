@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/razorpay";
+import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
+import { renderReceiptPdf } from "@/lib/receipt";
+import { sendOrderConfirmation, sendAdminNewOrder } from "@/lib/email";
+
+// react-pdf needs the Node.js runtime.
+export const runtime = "nodejs";
 
 interface RazorpayWebhook {
   event: string;
@@ -69,6 +75,65 @@ export async function POST(request: Request) {
           : {},
     }),
   ]);
+
+  // Receipt + emails. Best-effort: a mail failure must not fail the webhook
+  // (the payment is already recorded and this event won't be reprocessed).
+  try {
+    const receiptNumber = `RCPT-${new Date()
+      .toISOString()
+      .slice(0, 10)
+      .replace(/-/g, "")}-${payment.id.slice(-6).toUpperCase()}`;
+
+    const receipt = await prisma.receipt.upsert({
+      where: { paymentId: payment.id },
+      update: {},
+      create: { paymentId: payment.id, receiptNumber },
+    });
+
+    const order = await prisma.order.findUnique({
+      where: { id: payment.orderId },
+      include: { user: true },
+    });
+
+    if (order) {
+      const selections: OrderSelections = {
+        tier: order.tier as OrderSelections["tier"],
+        deliveryPlan: order.deliveryPlan,
+        addons: Array.isArray(order.addons)
+          ? (order.addons as OrderSelections["addons"])
+          : [],
+      };
+      const lineItems = describeOrderLineItems(selections);
+
+      const pdf = await renderReceiptPdf({
+        receiptNumber: receipt.receiptNumber,
+        issuedAt: receipt.issuedAt,
+        orderId: order.id,
+        customerName: order.user.name,
+        customerEmail: order.user.email,
+        lineItems,
+        totalPaise: order.priceTotal,
+        razorpayPaymentId,
+      });
+
+      await sendOrderConfirmation({
+        to: order.user.email,
+        orderId: order.id,
+        receiptNumber: receipt.receiptNumber,
+        totalPaise: order.priceTotal,
+        pdf,
+      });
+      await sendAdminNewOrder({
+        orderId: order.id,
+        category: order.category,
+        tier: order.tier,
+        totalPaise: order.priceTotal,
+        customerEmail: order.user.email,
+      });
+    }
+  } catch (err) {
+    console.error("[razorpay webhook] receipt/email failed", err);
+  }
 
   return NextResponse.json({ ok: true });
 }

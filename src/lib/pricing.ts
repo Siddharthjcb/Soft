@@ -145,6 +145,35 @@ export function computeOrderTotal(sel: OrderSelections): number {
   return (tier?.pricePaise ?? 0) + (delivery?.surchargePaise ?? 0) + addonTotal;
 }
 
+/** Human-readable line items for a receipt / order summary. */
+export function describeOrderLineItems(
+  sel: OrderSelections,
+): { label: string; amountPaise: number }[] {
+  const items: { label: string; amountPaise: number }[] = [];
+
+  const tier = TIERS.find((t) => t.id === sel.tier);
+  if (tier) {
+    items.push({
+      label: `${tier.name} — ${tier.tagline}${tier.priceIsFrom ? " (from)" : ""}`,
+      amountPaise: tier.pricePaise,
+    });
+  }
+
+  const delivery = DELIVERY_OPTIONS.find((d) => d.id === sel.deliveryPlan);
+  if (delivery && delivery.surchargePaise > 0) {
+    items.push({ label: delivery.name, amountPaise: delivery.surchargePaise });
+  }
+
+  for (const id of sel.addons) {
+    const addon = ADDONS.find((a) => a.id === id);
+    if (addon) {
+      items.push({ label: `${addon.name} (from)`, amountPaise: addon.fromPaise });
+    }
+  }
+
+  return items;
+}
+
 export function isValidSelections(value: unknown): value is OrderSelections {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
