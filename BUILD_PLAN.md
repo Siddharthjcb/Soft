@@ -77,7 +77,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       button the operator clicks manually each month."
 
 ## Phase 7 — Polish
-- [ ] **7.1** "Full visual QA pass against DESIGN.md across every page built
+- [x] **7.1** "Full visual QA pass against DESIGN.md across every page built
       so far: font stack applied, spacing rhythm consistent, only one accent
       color in use, buttons/cards match spec, mobile responsive down to
       375px width. Fix any drift."
