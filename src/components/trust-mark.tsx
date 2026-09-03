@@ -12,6 +12,25 @@ import {
 const STORAGE_KEY = "seen-before";
 
 /**
+ * Two <TrustMark>s mount per page (the mobile inline one and the desktop
+ * fixture; CSS hides one). Reading localStorage per instance meant the first
+ * to mount set the flag and the second immediately read itself as a returning
+ * visitor. Resolve it once per page load and share the answer.
+ */
+let returningVisitor: boolean | null = null;
+
+function readReturningOnce(): boolean {
+  if (returningVisitor !== null) return returningVisitor;
+  try {
+    returningVisitor = window.localStorage.getItem(STORAGE_KEY) === "1";
+    window.localStorage.setItem(STORAGE_KEY, "1");
+  } catch {
+    returningVisitor = false; // private mode — treat as a first visit
+  }
+  return returningVisitor;
+}
+
+/**
  * Derives the Mark's context from what the visitor is actually doing.
  * Deliberately coarse — the point is that the line feels apt, not that we
  * track anyone.
@@ -25,13 +44,7 @@ function useTrustContext(signingUp: boolean): {
   const browsing = useRef(false);
 
   useEffect(() => {
-    let returning = false;
-    try {
-      returning = window.localStorage.getItem(STORAGE_KEY) === "1";
-      window.localStorage.setItem(STORAGE_KEY, "1");
-    } catch {
-      /* private mode — treat as a first visit */
-    }
+    const returning = readReturningOnce();
 
     const appear = setTimeout(
       () => setVisible(true),

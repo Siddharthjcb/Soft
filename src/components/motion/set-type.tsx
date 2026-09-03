@@ -47,6 +47,13 @@ export function SetType({
         import("gsap/ScrollTrigger"),
       ]);
       if (cancelled) return;
+
+      // Never hide something the viewer can already see. gsap.from() applies
+      // its start state immediately, so animating an in-view element would
+      // blank it until ScrollTrigger fires — and if GSAP had failed to load at
+      // all, it would stay blank forever. Only below-fold elements animate.
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.88) return;
+
       gsap.registerPlugin(ScrollTrigger);
 
       ctx = gsap.context(() => {

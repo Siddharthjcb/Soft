@@ -33,6 +33,11 @@ export function DrawRule({
         import("gsap/ScrollTrigger"),
       ]);
       if (cancelled) return;
+
+      // Same rule as <SetType>: never collapse a rule that is already on
+      // screen, and never leave one collapsed if GSAP failed to load.
+      if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return;
+
       gsap.registerPlugin(ScrollTrigger);
 
       ctx = gsap.context(() => {

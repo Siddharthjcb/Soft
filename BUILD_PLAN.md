@@ -261,7 +261,7 @@ and stay untouched in the dashboard. Never change the root token values.
       dismissible on Escape. Use `[REAL NAME]` placeholders and log VIS-B2.
       Confirm build."
 
-- [ ] **12.5** "`<TierGrid>`. A 12-column modular grid: the primary tile spans
+- [x] **12.5** "`<TierGrid>`. A 12-column modular grid: the primary tile spans
       columns 1-7 and rows 1-3, filled with clay-blush, clay border, carrying
       the trial CTA and the page's only shadow; three secondary tiles at
       columns 9-12, hairline borders on raised paper, deliberately not
@@ -271,7 +271,7 @@ and stay untouched in the dashboard. Never change the root token values.
       tile plus a three-row index. Tier data comes from `src/lib/pricing.ts`.
       Confirm build."
 
-- [ ] **12.6** "Rebuild the home page in the new system: hero (LanguageCycle
+- [x] **12.6** "Rebuild the home page in the new system: hero (LanguageCycle
       eyebrow, display headline with one clay word, subline, trial CTA with its
       reassurance line), TierGrid, categories as an editorial two-column list,
       closing section (manifesto + offset LanguageCycle + final CTA), and

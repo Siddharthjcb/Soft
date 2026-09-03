@@ -221,6 +221,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** Writes a single `seen-before` flag to localStorage (wrapped in try/catch for private mode). No schema change
 - **Outside the project:** None
 
+### VIS-12.5 / 12.6 — TierGrid, CTA config, home page rebuilt
+- **A** `src/components/tier-grid.tsx`, `src/lib/cta.ts`
+- **M** `src/lib/pricing.ts` (Tier.short), `src/app/(marketing)/page.tsx`, `src/components/site-header.tsx`, `src/components/site-footer.tsx`, `src/components/motion/set-type.tsx` + `draw-rule.tsx` (in-view guard), `src/components/trust-mark.tsx` (shared returning-visitor read)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03
