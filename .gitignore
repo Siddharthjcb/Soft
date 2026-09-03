@@ -49,3 +49,6 @@ next-env.d.ts
 
 # screenshots (review artifacts)
 /screenshots/
+
+# design scratch (working files for mocks)
+/design/

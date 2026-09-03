@@ -185,6 +185,17 @@ the project unless called out in the "Outside the project" section at the end.
 
 ---
 
+## VIS — Visual identity
+
+### VIS-0 — Design direction proposal (terracotta + language cycle + tiles + trust mark)
+- **A** `docs/DESIGN-DIRECTION.md`
+- **M** `.gitignore` (ignore `/design/` mock working files)
+- **Dependencies:** None
+- **Side effects:** None — proposal only, no code, no schema change. A design canvas was published to the user's own Artifacts (not a repo change)
+- **Outside the project:** None
+
+---
+
 ## Outside the project — session of 2026-09-03
 
 Done **before** this logging rule existed. Nothing at OS root; no `sudo` was
