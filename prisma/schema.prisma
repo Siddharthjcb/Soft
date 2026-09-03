@@ -53,6 +53,11 @@ enum HostingStatus {
   cancelled
 }
 
+enum RevisionStatus {
+  open
+  addressed
+}
+
 model User {
   id        String   @id @default(cuid())
   clerkId   String   @unique
@@ -75,12 +80,12 @@ model Order {
   addons           Json         @default("[]")
   requirementsText String?
   status           OrderStatus  @default(pending_payment)
-  revisionNote     String? // latest customer revision request (task 4.1)
   deliveredUrl     String? // live site URL, set when marked delivered (task 5.1)
   deadlineDate     DateTime?
   priceTotal       Int // paise
   assets           Asset[]
   payments         Payment[]
+  revisions        RevisionRequest[]
   hosting          HostingSubscription?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
@@ -122,6 +127,29 @@ model Receipt {
   payment       Payment  @relation(fields: [paymentId], references: [id])
   receiptNumber String   @unique
   issuedAt      DateTime @default(now())
+}
+
+/// A customer's revision request. Kept as history — never overwritten.
+model RevisionRequest {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  note      String
+  status    RevisionStatus @default(open)
+  createdAt DateTime       @default(now())
+
+  @@index([orderId])
+}
+
+/// Replay protection: a webhook event id is claimed once and only once.
+model ProcessedWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String // "clerk" | "razorpay"
+  eventId     String
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt])
 }
 
 /// Fixed-window rate-limit counters. Postgres-backed so there is no extra

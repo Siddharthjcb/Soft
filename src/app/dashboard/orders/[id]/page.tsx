@@ -25,7 +25,11 @@ export default async function OrderDetailPage({
   const user = await getCurrentUser();
   const order = await prisma.order.findUnique({
     where: { id },
-    include: { assets: true, payments: { include: { receipt: true } } },
+    include: {
+      assets: true,
+      payments: { include: { receipt: true } },
+      revisions: { orderBy: { createdAt: "desc" } },
+    },
   });
   if (!order || order.userId !== user.id) notFound();
 
@@ -123,14 +127,23 @@ export default async function OrderDetailPage({
           )}
         </section>
 
-        {order.revisionNote && (
-          <section className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-6">
+        {order.revisions.length > 0 && (
+          <section className="flex flex-col gap-3">
             <h2 className="font-mono text-xs uppercase tracking-widest text-muted">
-              Your last revision request
+              Your revision requests
             </h2>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">
-              {order.revisionNote}
-            </p>
+            <ul className="flex flex-col divide-y divide-border rounded-xl border border-border">
+              {order.revisions.map((r) => (
+                <li key={r.id} className="flex flex-col gap-2 p-5">
+                  <span className="font-mono text-xs uppercase tracking-widest text-muted">
+                    {r.createdAt.toISOString().slice(0, 10)} · {r.status}
+                  </span>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-ink">
+                    {r.note}
+                  </p>
+                </li>
+              ))}
+            </ul>
           </section>
         )}
 

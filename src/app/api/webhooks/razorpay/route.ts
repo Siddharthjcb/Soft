@@ -6,6 +6,7 @@ import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
 import { renderReceiptPdf } from "@/lib/receipt";
 import { sendOrderConfirmation, sendAdminNewOrder } from "@/lib/email";
 import { jsonError } from "@/lib/api";
+import { claimWebhookEvent, isStaleEvent } from "@/lib/webhook";
 import { razorpayEventBody } from "@/lib/schemas";
 
 // react-pdf needs the Node.js runtime.
@@ -37,6 +38,24 @@ export async function POST(request: Request) {
     return jsonError(400, "invalid_event", "Unrecognised event payload.");
   }
   const event = parsed.data;
+
+  // Replay window: reject events far outside the tolerance.
+  if (isStaleEvent(event.created_at)) {
+    return jsonError(400, "stale_event", "Event timestamp is outside the window.");
+  }
+
+  // Claim the event id so a retry or replay is a no-op.
+  const eventId =
+    request.headers.get("x-razorpay-event-id") ??
+    event.payload.payment?.entity.id ??
+    event.payload.payment_link?.entity.id ??
+    event.payload.order?.entity.id;
+  if (!eventId) {
+    return jsonError(400, "missing_event_id", "No event id on the request.");
+  }
+  if (!(await claimWebhookEvent("razorpay", `${event.event}:${eventId}`))) {
+    return NextResponse.json({ ok: true, alreadyProcessed: true });
+  }
 
   const isPaid =
     event.event === "payment.captured" ||

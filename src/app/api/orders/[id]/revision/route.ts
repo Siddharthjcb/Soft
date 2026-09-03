@@ -40,13 +40,16 @@ export async function POST(
     );
   }
 
-  await prisma.order.update({
-    where: { id: p.data.id },
-    data: {
-      status: OrderStatus.revision_requested,
-      revisionNote: parsed.data.note,
-    },
-  });
+  // Append to the history — never overwrite an earlier request.
+  const [revision] = await prisma.$transaction([
+    prisma.revisionRequest.create({
+      data: { orderId: p.data.id, note: parsed.data.note },
+    }),
+    prisma.order.update({
+      where: { id: p.data.id },
+      data: { status: OrderStatus.revision_requested },
+    }),
+  ]);
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, id: revision.id });
 }

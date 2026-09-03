@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { jsonError } from "@/lib/api";
+import { claimWebhookEvent, isStaleEvent } from "@/lib/webhook";
 import { clerkEventBody, clerkUserData } from "@/lib/schemas";
 
 export async function POST(req: Request) {
@@ -25,6 +26,11 @@ export async function POST(req: Request) {
     return jsonError(400, "missing_headers", "Missing svix headers.");
   }
 
+  // svix enforces its own tolerance during verify(); this is a second gate.
+  if (isStaleEvent(svixTimestamp)) {
+    return jsonError(400, "stale_event", "Event timestamp is outside the window.");
+  }
+
   let verified: unknown;
   try {
     verified = new Webhook(secret).verify(payload, {
@@ -39,6 +45,11 @@ export async function POST(req: Request) {
   const event = clerkEventBody.safeParse(verified);
   if (!event.success) {
     return jsonError(400, "invalid_event", "Unrecognised event payload.");
+  }
+
+  // Claim the event id so a retry or replay is a no-op.
+  if (!(await claimWebhookEvent("clerk", svixId))) {
+    return NextResponse.json({ ok: true, alreadyProcessed: true });
   }
 
   if (event.data.type === "user.deleted") {

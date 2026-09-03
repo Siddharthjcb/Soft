@@ -22,6 +22,9 @@ CREATE TYPE "PaymentStatus" AS ENUM ('created', 'success', 'failed');
 -- CreateEnum
 CREATE TYPE "HostingStatus" AS ENUM ('active', 'paused', 'cancelled');
 
+-- CreateEnum
+CREATE TYPE "RevisionStatus" AS ENUM ('open', 'addressed');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -46,7 +49,6 @@ CREATE TABLE "Order" (
     "addons" JSONB NOT NULL DEFAULT '[]',
     "requirementsText" TEXT,
     "status" "OrderStatus" NOT NULL DEFAULT 'pending_payment',
-    "revisionNote" TEXT,
     "deliveredUrl" TEXT,
     "deadlineDate" TIMESTAMP(3),
     "priceTotal" INTEGER NOT NULL,
@@ -90,6 +92,27 @@ CREATE TABLE "Receipt" (
     "issuedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Receipt_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "RevisionRequest" (
+    "id" TEXT NOT NULL,
+    "orderId" TEXT NOT NULL,
+    "note" TEXT NOT NULL,
+    "status" "RevisionStatus" NOT NULL DEFAULT 'open',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "RevisionRequest_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "ProcessedWebhookEvent" (
+    "id" TEXT NOT NULL,
+    "provider" TEXT NOT NULL,
+    "eventId" TEXT NOT NULL,
+    "processedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "ProcessedWebhookEvent_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -146,6 +169,15 @@ CREATE UNIQUE INDEX "Receipt_paymentId_key" ON "Receipt"("paymentId");
 CREATE UNIQUE INDEX "Receipt_receiptNumber_key" ON "Receipt"("receiptNumber");
 
 -- CreateIndex
+CREATE INDEX "RevisionRequest_orderId_idx" ON "RevisionRequest"("orderId");
+
+-- CreateIndex
+CREATE INDEX "ProcessedWebhookEvent_processedAt_idx" ON "ProcessedWebhookEvent"("processedAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ProcessedWebhookEvent_provider_eventId_key" ON "ProcessedWebhookEvent"("provider", "eventId");
+
+-- CreateIndex
 CREATE INDEX "RateLimit_windowStart_idx" ON "RateLimit"("windowStart");
 
 -- CreateIndex
@@ -165,6 +197,9 @@ ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderI
 
 -- AddForeignKey
 ALTER TABLE "Receipt" ADD CONSTRAINT "Receipt_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "RevisionRequest" ADD CONSTRAINT "RevisionRequest_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HostingSubscription" ADD CONSTRAINT "HostingSubscription_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

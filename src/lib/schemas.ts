@@ -87,6 +87,8 @@ export const clerkUserData = z.looseObject({
 
 export const razorpayEventBody = z.object({
   event: z.string(),
+  /** unix seconds; used for replay-window checks */
+  created_at: z.number().optional(),
   payload: z.looseObject({
     payment: z
       .looseObject({
