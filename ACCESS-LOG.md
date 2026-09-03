@@ -208,6 +208,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change). GSAP is dynamically imported so it stays out of the initial bundle
 - **Outside the project:** None
 
+### VIS-12.3 — LanguageCycle + 12 scripts
+- **A** `src/lib/languages.ts`, `src/lib/languages.test.ts`, `src/components/language-cycle.tsx`
+- **M** `src/lib/fonts.ts` (ten Indic faces, all `preload: false`)
+- **Dependencies:** ten more `next/font/google` families (self-hosted at build, no npm package)
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

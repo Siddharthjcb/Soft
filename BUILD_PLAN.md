@@ -235,7 +235,7 @@ and stay untouched in the dashboard. Never change the root token values.
       ink-press interaction to the Button primitive inside the editorial scope
       only: hover deepens to clay-fired + translateY(1px). Confirm build."
 
-- [ ] **12.3** "`<LanguageCycle>` + `src/lib/languages.ts`. Twelve entries
+- [x] **12.3** "`<LanguageCycle>` + `src/lib/languages.ts`. Twelve entries
       (Hindi, Bengali, Tamil, Telugu, Malayalam, Kannada, Gujarati, Punjabi,
       Odia, Marathi, Assamese, Urdu) each with script id, `next/font/google`
       family, and two phrases (`welcome`, `begin`). Load the Indic faces with
