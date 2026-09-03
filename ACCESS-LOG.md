@@ -215,6 +215,12 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change)
 - **Outside the project:** None
 
+### VIS-12.4 — TrustMark + context hook
+- **A** `src/lib/trust-mark.ts`, `src/components/trust-mark.tsx`
+- **Dependencies:** None
+- **Side effects:** Writes a single `seen-before` flag to localStorage (wrapped in try/catch for private mode). No schema change
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

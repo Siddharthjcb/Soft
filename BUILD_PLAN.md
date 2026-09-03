@@ -248,7 +248,7 @@ and stay untouched in the dashboard. Never change the root token values.
       Mark every translation `// VIS-B1: needs native-speaker review`. Unit-test
       the selection and offset logic. Confirm build."
 
-- [ ] **12.4** "`<TrustMark>` + `useTrustContext()` +
+- [x] **12.4** "`<TrustMark>` + `useTrustContext()` +
       `src/lib/trust-mark.ts`. Config exports a line pool per context
       (`arrive | browsing | near-cta | signing-up | returning`) plus the
       transparency-panel content (people, promises, href) — all data, no JSX.
