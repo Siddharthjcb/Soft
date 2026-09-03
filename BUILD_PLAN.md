@@ -226,7 +226,7 @@ and stay untouched in the dashboard. Never change the root token values.
       token values or any dashboard/admin page. Confirm `npm run build` passes
       and the dashboard still renders monochrome."
 
-- [ ] **12.2** "Motion foundation. Install `gsap`. Create
+- [x] **12.2** "Motion foundation. Install `gsap`. Create
       `src/components/motion/` with: `<SetType>` (fade up 8px + variable-font
       weight settling from 480 to target over 500ms on scroll-in) and
       `<DrawRule>` (a hairline that animates width 0->100% on enter). Both use

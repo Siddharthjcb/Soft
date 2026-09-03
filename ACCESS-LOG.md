@@ -201,6 +201,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change). Verified in a real browser that the scope resolves and the dashboard tokens are untouched
 - **Outside the project:** None
 
+### VIS-12.2 — Motion foundation
+- **A** `src/components/motion/set-type.tsx`, `src/components/motion/draw-rule.tsx`
+- **M** `src/components/ui/button.tsx` (data-variant hook), `src/app/globals.css` (scoped stamp-press CTA), `package.json`
+- **Dependencies:** `gsap`
+- **Side effects:** None (no schema change). GSAP is dynamically imported so it stays out of the initial bundle
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

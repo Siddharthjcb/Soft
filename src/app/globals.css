@@ -110,6 +110,31 @@
   }
 }
 
+/*
+ * The primary action on the editorial surface is terracotta, and hovering it
+ * presses like a stamp. Retargeted by scope so the dashboard's primary button
+ * stays monochrome.
+ */
+[data-surface="editorial"] [data-variant="primary"] {
+  background: var(--color-clay);
+  color: var(--color-paper);
+  transition:
+    background-color 180ms ease-out,
+    transform 180ms ease-out;
+}
+
+[data-surface="editorial"] [data-variant="primary"]:hover {
+  background: var(--color-clay-fired);
+  opacity: 1;
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-surface="editorial"] [data-variant="primary"]:hover {
+    transform: none;
+  }
+}
+
 /* Paper grain — the only texture. ~1KB, static, never animated. */
 [data-surface="editorial"] .grain::before {
   content: "";
