@@ -58,7 +58,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       every new order."
 
 ## Phase 4 — Customer portal
-- [ ] **4.1** "Build /dashboard listing the logged-in user's orders with
+- [x] **4.1** "Build /dashboard listing the logged-in user's orders with
       status badges. Build /dashboard/orders/[id] showing full order detail,
       uploaded assets, a receipt download link, and a 'request revision'
       button that sets status to revision_requested with a note field."
