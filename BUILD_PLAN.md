@@ -195,7 +195,7 @@ Closes B-09. Nothing was verified beyond compiling.
       id. Also cover `rateLimit` window boundaries and the `/api/orders`
       idempotency-key short-circuit."
 
-- [ ] **11.3** "Playwright smoke test over the surfaces that need no
+- [x] **11.3** "Playwright smoke test over the surfaces that need no
       credentials: home, /pricing, /portfolio render with expected headings and
       a working nav; /order/new advances category -> tier -> add-ons with the
       running total updating; /dashboard and /admin redirect an anonymous

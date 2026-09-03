@@ -153,6 +153,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None (no schema change; Prisma, react-pdf and Resend are all mocked — no service is contacted)
 - **Outside the project:** None
 
+### 11.3 — Playwright smoke suite
+- **A** `playwright.config.ts`, `e2e/smoke.spec.ts`
+- **M** `package.json` (pretest:e2e / test:e2e), `.github/workflows/ci.yml` (browser install + e2e + report artifact), `.gitignore` (Playwright artifacts), `BLOCKERS.md` (added B-14)
+- **Dependencies:** `@playwright/test` (dev). Chromium downloaded with `PLAYWRIGHT_BROWSERS_PATH=0` so it lands in `node_modules/playwright-core/.local-browsers` **inside the project**, not the default `~/Library/Caches/ms-playwright`
+- **Side effects:** ~95MB browser download into node_modules (gitignored). Suite could not execute in the agent sandbox — see B-14; CI verifies it
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

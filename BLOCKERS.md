@@ -67,6 +67,15 @@ zod schema, and API error parsing (task 11.1).
 task 11.3. Mocked-Prisma behaviour tests (settlement idempotency, rate-limit
 windows) landed in 11.2.
 
+## B-14 — Playwright cannot run in the agent sandbox · `open`
+The e2e suite (`e2e/smoke.spec.ts`, 11 tests) is committed and wired into CI,
+but it could not be executed locally: the browser subprocess fails every
+navigation with `ERR_NAME_NOT_RESOLVED` on `127.0.0.1` while the Node-side
+`request` fixture reaches the same server fine — the sandbox restricts the
+browser's network, not the tests. CI is the verification path.
+**To close:** run `npm run test:e2e` on your machine to confirm it passes
+outside CI too.
+
 ## B-10 — Next 16 deprecates `middleware.ts` · `open`
 Build warns that the convention is now `proxy.ts`. Kept as `middleware.ts`
 because that is what Clerk documents.
