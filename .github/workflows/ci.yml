@@ -21,8 +21,16 @@ jobs:
           node-version: 22
           cache: npm
 
+      # Placeholder env so `prisma generate` (postinstall) and `next build`
+      # resolve every variable. No real secrets are needed to lint/typecheck/build.
+      - name: Placeholder env
+        run: cp .env.example .env
+
       - name: Install
         run: npm ci
+
+      - name: Generate route types
+        run: npx next typegen
 
       - name: Lint
         run: npm run lint
