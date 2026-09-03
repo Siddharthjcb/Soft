@@ -69,6 +69,7 @@ model Order {
   addons           Json         @default("[]")
   requirementsText String?
   status           OrderStatus  @default(pending_payment)
+  revisionNote     String? // latest customer revision request (task 4.1)
   deadlineDate     DateTime?
   priceTotal       Int // paise
   assets           Asset[]
