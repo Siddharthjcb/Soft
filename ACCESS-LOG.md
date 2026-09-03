@@ -121,6 +121,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** init migration + Prisma client regenerated
 - **Outside the project:** None
 
+### 10.2 — Admin operations upgrade
+- **A** `src/app/admin/customers/page.tsx`, `src/app/admin/customers/loading.tsx`, `src/app/admin/customers/[id]/page.tsx`, `src/app/admin/customers/[id]/loading.tsx`
+- **M** `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`, `BLOCKERS.md` (added B-12)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

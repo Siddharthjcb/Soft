@@ -71,6 +71,13 @@ because that is what Clerk documents.
 **To close:** revisit when Clerk documents `proxy.ts`, or run
 `npx @next/codemod@canary middleware-to-proxy .` and verify auth still gates.
 
+## B-12 — `/admin/customers` totals computed in memory · `open`
+The customer list pulls every user's orders and sums `priceTotal` in JS. Fine
+at operator scale, wrong shape once there are many customers or orders.
+**To close:** replace with a `prisma.order.groupBy({ by: ['userId'] })`
+aggregate plus pagination. See the comment in
+`src/app/admin/customers/page.tsx`.
+
 ## B-11 — npm audit: 3 high, dev-only · `open`
 Inside the `prisma` / `razorpay` dependency trees (`mysql2`, `deepmerge-ts`).
 Not in the runtime path; the offered "fix" downgrades Prisma.
