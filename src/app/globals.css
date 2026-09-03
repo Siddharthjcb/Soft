@@ -41,6 +41,11 @@
   }
 }
 
+/* Native controls (select menus, scrollbars) follow the theme. */
+:root {
+  color-scheme: light dark;
+}
+
 body {
   background: var(--color-paper);
   color: var(--color-ink);

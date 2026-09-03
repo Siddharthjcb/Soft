@@ -298,12 +298,19 @@ export function OrderForm({ isSignedIn }: { isSignedIn: boolean }) {
       {draft.step === 4 && (
         <div className="flex flex-col gap-8">
           <Fieldset legend="What do you need?">
+            <label
+              htmlFor="requirements"
+              className="font-mono text-xs uppercase tracking-widest text-muted"
+            >
+              Describe the site or system
+            </label>
             <textarea
+              id="requirements"
               value={draft.requirements}
               onChange={(e) => patch({ requirements: e.target.value })}
               rows={7}
               maxLength={5000}
-              placeholder="Describe the site or system you want: pages, features, content you have, examples you like."
+              placeholder="Pages, features, content you already have, examples you like."
               className="w-full rounded-lg border border-border bg-transparent p-4 text-sm leading-relaxed text-ink outline-none focus:ring-2 focus:ring-ink"
             />
           </Fieldset>

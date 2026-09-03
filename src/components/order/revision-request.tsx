@@ -49,12 +49,18 @@ export function RevisionRequest({ orderId }: { orderId: string }) {
   return (
     <section className="flex flex-col gap-3 rounded-xl border border-border bg-surface p-6">
       <h2 className="text-xl font-semibold tracking-tight">Request a revision</h2>
+      <label
+        htmlFor="revision-note"
+        className="font-mono text-xs uppercase tracking-widest text-muted"
+      >
+        What would you like changed?
+      </label>
       <textarea
+        id="revision-note"
         value={note}
         onChange={(e) => setNote(e.target.value)}
         rows={5}
         maxLength={2000}
-        placeholder="What would you like changed?"
         className="w-full rounded-lg border border-border bg-transparent p-4 text-sm leading-relaxed text-ink outline-none focus:ring-2 focus:ring-ink"
       />
       {error && <p className="text-sm text-danger">{error}</p>}
