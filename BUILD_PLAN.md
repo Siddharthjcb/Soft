@@ -12,12 +12,12 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
 ---
 
 ## Phase 0 — Setup (do this yourself, not via prompt)
-- [ ] Repo initialized, CI/CD confirmed working on a trivial change
+- [x] Repo initialized, CI/CD confirmed working on a trivial change
 - [ ] Neon Postgres project created, connection string in `.env`
 - [ ] Clerk project created, keys in `.env`
 - [ ] Razorpay account created (test mode keys in `.env`)
 - [ ] Resend account + API key in `.env`
-- [ ] Copy CLAUDE.md and DESIGN.md into repo root; copy `.claude/skills/build-next/`
+- [x] Copy CLAUDE.md and DESIGN.md into repo root; copy `.claude/skills/build-next/`
       into your repo's `.claude/skills/`
 
 ## Phase 1 — Foundation
