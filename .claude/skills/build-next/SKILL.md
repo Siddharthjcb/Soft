@@ -34,9 +34,11 @@ task.
    passed, and anything you were unsure about or had to assume.
 
 If a task is ambiguous or you're missing an external credential (API key,
-account not yet created), do NOT guess or fabricate one — stop, leave the
-task unchecked, and clearly report what's blocking it instead of inventing a
-workaround.
+account not yet created), do NOT guess or fabricate one. Write a working
+skeleton so the build stays green, mark the spot with
+`// BLOCKED(B-nn): <one line>`, add or update the entry in `BLOCKERS.md`, and
+carry on with the rest of the task. Only stop outright if the blocker makes
+the whole task impossible — then leave it unchecked and report why.
 
 ## Filesystem boundary (non-negotiable)
 

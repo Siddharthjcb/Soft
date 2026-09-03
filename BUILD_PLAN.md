@@ -132,3 +132,43 @@ these run, generate real additive migrations with `prisma migrate dev` instead.
       Razorpay) is more than 5 minutes old, and skip events already in
       `ProcessedWebhookEvent`. Drop the unused `revisionNote` column and its
       CLAUDE.md reference. Confirm `npm run build` passes."
+
+## Phase 10 — Reliability & operations (v1.2)
+
+Anything that cannot be finished without a live service gets a skeleton with a
+`// BLOCKED(B-nn):` comment and an entry in `BLOCKERS.md` — never a guess.
+
+- [ ] **10.1** "Payment reliability and order integrity. Extract the payment
+      settlement logic (mark Payment success, flip Order pending_payment ->
+      new, set deadlineDate, create the Receipt, send customer + admin email)
+      out of the Razorpay webhook into `src/lib/payments.ts`
+      `settleOrderPayment()`, idempotent, and call it from both the webhook and
+      a new POST `/api/payments/verify`. The verify route takes
+      `razorpay_order_id`, `razorpay_payment_id`, `razorpay_signature` from the
+      Checkout handler and verifies `HMAC_SHA256(order_id|payment_id,
+      RAZORPAY_KEY_SECRET)`, so payment confirms instantly instead of waiting
+      on the webhook. Add `deliveryDays()` to pricing and set `Order.deadlineDate`
+      on settlement (rush 2 days, standard 7). Add an `idempotencyKey` (unique,
+      nullable) to Order so a double-submitted order form returns the existing
+      order instead of creating a second one; send it from the client. Update
+      PayButton to call verify then route to the order page. Confirm
+      `npm run build` passes."
+
+- [ ] **10.2** "Admin operations upgrade. Add an overview strip to `/admin`:
+      counts per status, orders awaiting action (new + revision_requested),
+      and this month's settled revenue — all from one grouped query. Add a
+      search box filtering by order id or customer email (query param, server
+      side) that composes with the existing status filter. Add
+      `/admin/customers` listing users with their order count and lifetime
+      total, and `/admin/customers/[id]` showing that customer's orders.
+      Keep DESIGN.md: monochrome, mono labels, no new colours. Confirm
+      `npm run build` passes."
+
+- [ ] **10.3** "Customer billing page and SEO. Build `/dashboard/billing`
+      (it is in the CLAUDE.md route map but unbuilt): payment history with
+      amount, type (order/hosting), status and a receipt download link where
+      one exists, plus hosting subscription state and next billing date.
+      Then SEO: per-page `metadata` with titles and descriptions on every
+      public page, `src/app/sitemap.ts`, `src/app/robots.ts`, and JSON-LD
+      Organization + Service structured data on the home page. Use
+      NEXT_PUBLIC_APP_URL for absolute URLs. Confirm `npm run build` passes."

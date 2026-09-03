@@ -98,3 +98,14 @@ fonts, or spacing values.
 - **Append to `ACCESS-LOG.md` after every implementation task**: files
   added/modified/deleted, dependencies installed, commands with side effects,
   and anything outside the project (normally "None"). Commit it with the task.
+
+## Blockers
+
+Never guess or fabricate around a missing credential, price, or decision. When
+something cannot be finished:
+
+1. Write a working skeleton (types, route, UI shell) so the build stays green.
+2. Mark the exact spot with `// BLOCKED(B-nn): <one line>`.
+3. Add or update the entry in `BLOCKERS.md` — what is stubbed, where, and
+   precisely what is needed to close it.
+4. Keep going with the rest of the task.
