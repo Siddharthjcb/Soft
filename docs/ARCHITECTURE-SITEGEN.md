@@ -1,8 +1,8 @@
 # SiteGen — instant template sites
 
-**Status:** DRAFT — awaiting decisions in §11 before implementation
+**Status:** ACCEPTED — all six decisions resolved (§11); SG-1 cleared to start
 **Ref:** `SG`
-**Author:** drafted 2026-09-03
+**Author:** drafted 2026-09-03, accepted 2026-09-03
 
 ---
 
@@ -331,18 +331,47 @@ Each phase ends buildable, tested and committed under ref `SG`.
 Unit tests per phase; e2e for the public site render and the builder happy
 path. Blockers logged as `SG-Bnn` in BLOCKERS.md.
 
-## 11. Open decisions — needed before SG-1
+## 11. Decisions — all resolved 2026-09-03
 
-1. **Q1 Product framing.** Confirm SiteGen becomes Tier 1 self-serve while
-   Tiers 2–4 stay commissioned (§2), and that CLAUDE.md is rewritten to match.
-2. **Q2 URLs.** Path-based (`/s/aisha`, free) for v1, or pay for Vercel Pro now
-   to get subdomains (`aisha.ourdomain.com`, ~$20/mo)?
-3. **Q3 Trial.** How long — 7 or 14 days? And at expiry: site goes offline
-   entirely, or stays up with a footer badge until they buy?
-4. **Q4 After purchase.** One-time fee and the site is frozen, or one-time fee
-   plus a monthly hosting charge with editing kept open? This decides whether
-   SiteGen produces a one-off sale or recurring revenue.
-5. **Q5 Price.** Tier 1 is currently a ₹4,999 placeholder. Is a self-serve
-   instant site the same price, or cheaper because there is no labour?
-6. **Q6 Account requirement.** Must a visitor sign in *before* building, or can
-   they build anonymously and sign in only to publish (as the order form does)?
+**Q1 Product framing — Tier 1 becomes self-serve.** SiteGen delivers Tier 1
+("pick a template, flat fee") automatically. Tiers 2–4 remain commissioned
+through the existing order flow. CLAUDE.md rewritten to describe two delivery
+modes. Nothing already built is discarded.
+
+**Q2 URLs — path-based.** `/s/{slug}` for v1. No cost. Subdomains deferred;
+the resolver is isolated so the switch stays cheap when Vercel Pro is justified.
+
+**Q3 Trial — 14 days, soft expiry.** At day 14 the site *stays live* and grows
+a small "built with …" footer badge until purchase. Consequences:
+- `expired` is a **serving** state, not an offline one. The state machine in
+  §4.7 keeps its shape but `expired` still renders the site.
+- The badge is rendered by the site shell, not by templates, so it cannot be
+  removed by editing content or switching template.
+- Expired sites stay `noindex` (§4.10) — only `active` sites get indexed.
+- Softer conversion pressure, but the shared link never breaks and every
+  expired site markets the platform.
+
+**Q4 After purchase — one-time fee + monthly hosting, editing stays open.**
+Purchase moves the site to `active`, drops the badge, and opens a
+`HostingSubscription` (existing model, existing manual monthly payment-link
+flow). Customers keep editing indefinitely. SiteGen is therefore a recurring
+revenue product, not a one-off sale.
+
+**Q5 Price — below Tier 1, because it is automated.** Placeholder **₹1,999**
+one-time plus the existing ₹499/mo hosting. Tier 1's ₹4,999 assumed operator
+labour that self-serve does not consume. Logged with B-06; one file to change.
+
+**Q6 Account — sign in before content, not before play.** Template and theme
+selection are anonymous and instant; sign-in is required before the content
+steps. Rationale: choosing a look is the hook and must not sit behind a wall,
+but image and résumé uploads need auth anyway, and a half-finished portfolio
+held only in browser storage is too easy to lose. Selection is held in
+`sessionStorage` across the sign-in round trip, exactly as `/order/new` does.
+
+### Consequent adjustments
+
+- §4.7 state machine: `expired` continues to serve, with a badge.
+- §5 data model: `Site` gains `badgeSuppressed` (set true on purchase) — no
+  separate flag needed for the trial itself, which derives from `trialEndsAt`.
+- §10 delivery plan: SG-4 covers the badge and soft expiry; SG-5 covers
+  purchase, badge removal and hosting-subscription creation.

@@ -7,19 +7,34 @@ disagree, this file wins — update BUILD_PLAN.md to match.
 ## What this is
 
 A platform where small businesses (cloud kitchens, local vendors) and individuals
-(school/college students) order a website/system from us, pay online, track their
-order, and receive the finished product. We (the operator) fulfil each order
-manually/semi-manually using category templates — this platform is the ordering,
-payment, and tracking layer, NOT an automatic site generator.
+(school/college students) get a website or system, pay online, and track it.
+
+There are **two delivery modes**:
+
+1. **Instant (self-serve) — "SiteGen".** The customer picks a template and a
+   colour scheme, fills in a form, and gets a real hosted site within minutes.
+   Free for 14 days, then they buy it. Fully automated, no operator labour.
+   Sites are *rendered from data* by this same application — there is no
+   per-customer build or deploy. This is the primary dashboard feature.
+   Architecture: `docs/ARCHITECTURE-SITEGEN.md`.
+2. **Commissioned (operator-built).** The customer places an order describing
+   what they need, pays, and we build and deliver it manually/semi-manually.
+   This is the original ordering, payment and tracking flow.
+
+Mode 1 covers Tier 1. Mode 2 covers Tiers 2–4.
 
 ## Tiers (priced in ₹, INR only — never USD)
 
-| Tier | What it is |
-|---|---|
-| 1 | Pick a template, flat fee |
-| 2 | Tier 1 + customized features |
-| 3 | Advanced features |
-| 4 | Fully custom project/requirements |
+| Tier | What it is | Delivery |
+|---|---|---|
+| 1 | Pick a template, flat fee | **Instant, self-serve** (SiteGen) |
+| 2 | Tier 1 + customized features | Commissioned |
+| 3 | Advanced features | Commissioned |
+| 4 | Fully custom project/requirements | Commissioned |
+
+Tier 1 (SiteGen): one-time fee **below** the commissioned tiers because it
+consumes no operator time, plus the standard monthly hosting fee. Customers keep
+editing their site for as long as hosting is active.
 
 Delivery speed add-ons: 2-day rush vs 1-week standard (different fee).
 Add-ons: customization (+₹500 baseline, varies), security hardening (+₹1000 baseline).

@@ -177,6 +177,12 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None — planning only, no code, no schema change
 - **Outside the project:** None
 
+### SG-0a — Decisions accepted; CLAUDE.md realigned
+- **M** `docs/ARCHITECTURE-SITEGEN.md` (status DRAFT -> ACCEPTED; §11 rewritten with the six resolved decisions and their consequences), `CLAUDE.md` (two delivery modes; tier table now records which tier is instant vs commissioned), `BLOCKERS.md` (B-06 extended with the SiteGen price)
+- **Dependencies:** None
+- **Side effects:** None — documentation only, no code, no schema change
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

@@ -50,6 +50,9 @@ Every amount in `src/lib/pricing.ts` is provisional (Tier 1 ₹4,999 → Tier 4
 from ₹39,999, rush +₹2,000, hosting ₹499/mo). Add-on baselines (₹500 / ₹1,000)
 do match CLAUDE.md.
 **To close:** confirm real numbers; they live in one file.
+**Also pending:** the SiteGen self-serve price. Decided to sit *below* the
+commissioned tiers because it consumes no operator labour; placeholder ₹1,999
+one-time plus the existing ₹499/mo hosting (architecture §11 Q5).
 
 ## B-07 — No admin user exists · `needs-operator`
 `/admin` is gated on `User.role === 'admin'` and nothing sets it.
