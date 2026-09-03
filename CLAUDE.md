@@ -82,3 +82,15 @@ fonts, or spacing values.
 - Keep components small and colocated; prefer server components by default,
   client components only where interactivity requires it.
 - All money values stored as integers (paise), never floats.
+
+## Filesystem boundary (non-negotiable)
+
+- **Stay inside this project folder.** Reading or writing anything outside it —
+  the home directory, `~/.ssh`, `~/Library`, `~/Documents`, `/tmp`, another
+  repo — requires asking the operator for permission FIRST. Do not assume
+  earlier permission carries over to a new path or a new session.
+- **Never change anything at the OS root level. Never run `sudo`.** If a task
+  appears to need it, stop and report what is blocking instead.
+- **Append to `ACCESS-LOG.md` after every implementation task**: files
+  added/modified/deleted, dependencies installed, commands with side effects,
+  and anything outside the project (normally "None"). Commit it with the task.
