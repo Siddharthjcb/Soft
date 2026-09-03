@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SITE } from "@/lib/site";
+import { fontVariables } from "@/lib/fonts";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -29,7 +30,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <ClerkProvider>
-      <html lang="en" className="h-full antialiased">
+      {/* Font variables are defined here but only consumed inside
+          [data-surface="editorial"] — see globals.css. */}
+      <html lang="en" className={`h-full antialiased ${fontVariables}`}>
         <body className="flex min-h-full flex-col bg-paper font-sans text-ink">
           {children}
         </body>

@@ -214,7 +214,7 @@ by *scope*, not by replacing tokens globally. The `(marketing)` layout carries
 components (Button, Container) therefore restyle themselves inside marketing
 and stay untouched in the dashboard. Never change the root token values.
 
-- [ ] **12.1** "Rewrite `DESIGN.md` from `docs/DESIGN-DIRECTION.md` (terracotta
+- [x] **12.1** "Rewrite `DESIGN.md` from `docs/DESIGN-DIRECTION.md` (terracotta
       system, warm paper/ink, square geometry, motion language). In
       `globals.css`, add a `[data-surface=\"editorial\"]` scope redefining
       `--color-paper/ink/muted/border/surface/faint`, a new `--color-clay`,

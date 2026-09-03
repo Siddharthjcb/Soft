@@ -194,6 +194,13 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** None — proposal only, no code, no schema change. A design canvas was published to the user's own Artifacts (not a repo change)
 - **Outside the project:** None
 
+### VIS-12.1 — Editorial token scope + fonts
+- **A** `src/lib/fonts.ts`
+- **M** `DESIGN.md` (rewritten for two surfaces), `src/app/globals.css` (editorial scope, clay tokens, grain), `src/app/layout.tsx` (font vars on html), `src/app/(marketing)/layout.tsx` (data-surface wrapper), `BUILD_PLAN.md`
+- **Dependencies:** Bricolage Grotesque + Anek Latin via `next/font/google` (self-hosted at build, no new npm package)
+- **Side effects:** None (no schema change). Verified in a real browser that the scope resolves and the dashboard tokens are untouched
+- **Outside the project:** None
+
 ---
 
 ## Outside the project — session of 2026-09-03

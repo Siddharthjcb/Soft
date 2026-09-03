@@ -28,6 +28,16 @@
   --radius-md: 0.375rem; /* pills / tags / status badges — 6px */
   --radius-lg: 0.5rem; /* buttons / inputs — 8px */
   --radius-xl: 0.75rem; /* cards / panels / modals — 12px */
+
+  /*
+   * Declared here so Tailwind generates the utilities (font-display, bg-clay,
+   * text-clay-fired, bg-clay-blush …). Real values are set by the editorial
+   * scope below; these defaults keep the dashboard from ever inheriting them.
+   */
+  --font-display: var(--font-sans);
+  --color-clay: var(--color-ink);
+  --color-clay-fired: var(--color-ink);
+  --color-clay-blush: var(--color-faint);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -44,6 +54,70 @@
 /* Native controls (select menus, scrollbars) follow the theme. */
 :root {
   color-scheme: light dark;
+}
+
+/* ---------------------------------------------------------------------------
+ * Editorial surface — "The Broadsheet" (docs/DESIGN-DIRECTION.md)
+ *
+ * Applied by SCOPE, never by replacing the root tokens: the (marketing) layout
+ * carries data-surface="editorial" and everything inside it resolves to the
+ * terracotta system. Dashboard and admin are deliberately untouched — they are
+ * tools, not the pitch.
+ *
+ * Fired-earth palette. Nothing is pure white or pure black. Terracotta is the
+ * identity, held to ~3 appearances per viewport; more and it stops reading as
+ * premium. No red for errors here — danger sits too close to the identity
+ * colour, so marketing form errors use ink + an underline instead.
+ * ------------------------------------------------------------------------ */
+[data-surface="editorial"] {
+  --font-sans: var(--font-anek), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-bricolage), Georgia, serif;
+
+  --color-paper: #f6f0e8; /* the broadsheet column */
+  --color-surface: #fbf7f1; /* a tile lifted off the page */
+  --color-faint: #efe7db; /* the ground outside the column */
+  --color-ink: #211915; /* burnt-umber black, never #000 */
+  --color-muted: #6e5f53;
+  --color-border: #d9cdbd; /* hairline */
+
+  --color-clay: #b4552d; /* identity */
+  --color-clay-fired: #8f3f1f; /* hover / pressed */
+  --color-clay-blush: #f3e4da; /* fill of the one primary tile */
+
+  /* square geometry is part of the identity — nothing here is rounded */
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* "kiln at night" — terracotta lifts so it glows rather than muddies */
+  [data-surface="editorial"] {
+    --color-paper: #191410;
+    --color-surface: #211a15;
+    --color-faint: #120e0b;
+    --color-ink: #f0e7db;
+    --color-muted: #a2917f;
+    --color-border: #332a22;
+
+    --color-clay: #d9805a;
+    --color-clay-fired: #b4552d;
+    --color-clay-blush: #2e211a;
+  }
+}
+
+/* Paper grain — the only texture. ~1KB, static, never animated. */
+[data-surface="editorial"] .grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 body {

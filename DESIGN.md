@@ -1,142 +1,153 @@
-# Design System — "Futuristic Monochrome"
+# Design System
 
-Black and white only. No chromatic brand color. The aesthetic is precise,
-high-contrast, and spacious — a well-made instrument, not a poster. Confidence
-comes from restraint, sharp alignment, and generous negative space. If in doubt,
-remove an element rather than add one.
+This project has **two deliberate surfaces**. Know which one you are working on
+before you touch anything.
 
-**Stack note:** this project uses **Tailwind CSS v4**. There is no
-`tailwind.config.js` — design tokens live in `src/app/globals.css` inside an
-`@theme` block. The token *values* below are binding; the file format is v4 CSS.
+| Surface | Where | Character |
+|---|---|---|
+| **Editorial** — "The Broadsheet" | `(marketing)`: `/`, `/pricing`, `/portfolio`, `/order/new` | Terracotta, warm, typographic, square. The pitch. |
+| **Functional** — monochrome | `/dashboard/*`, `/admin/*`, auth pages | Neutral, quiet, dense-ish. Tools, not marketing. |
 
-## Theme
+Full rationale: `docs/DESIGN-DIRECTION.md`.
 
-Dark is the signature surface; light is a full, equal counterpart. Both are
-defined and the app is theme-aware (`prefers-color-scheme`, manual toggle later).
-Never hard-code hex in components — use the tokens.
+**Stack:** Tailwind CSS v4. There is no `tailwind.config.js` — tokens live in
+`src/app/globals.css`.
 
-## Typography
+---
 
-System stack — real SF on Apple, Segoe/Roboto elsewhere. No webfont load.
+## How the two surfaces coexist
 
-```css
---font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
-  "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
---font-mono: ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", Menlo,
-  Consolas, monospace;
+The editorial palette is applied **by scope, never by replacing root tokens**.
+The `(marketing)` layout carries `data-surface="editorial"`, and `globals.css`
+redefines `--color-*`, `--radius-*` and the font vars under that selector.
+
+Consequences you must respect:
+
+- **Never change the root `@theme` token values.** That would repaint the
+  dashboard.
+- Shared primitives (`Button`, `Container`) automatically restyle inside
+  marketing and stay monochrome outside it. Write them against tokens, never
+  against literal colours.
+- New editorial-only utilities (`bg-clay`, `text-clay-fired`,
+  `bg-clay-blush`, `font-display`) are declared at root with neutral fallbacks
+  so they are harmless if ever used outside the scope.
+
+---
+
+## Editorial surface — "The Broadsheet"
+
+The site is a type specimen. Typography is the interface. The register is a
+well-set newspaper and a hand-painted signboard, not Swiss minimalism — warm,
+legible, and unmistakably *of India*.
+
+### Colour — fired earth
+
+```
+--color-clay        #B4552D   identity
+--color-clay-fired  #8F3F1F   hover / pressed
+--color-clay-blush  #F3E4DA   fill of the ONE primary tile
+--color-paper       #F6F0E8   the broadsheet column
+--color-surface     #FBF7F1   a tile lifted off the page
+--color-faint       #EFE7DB   ground outside the column
+--color-ink         #211915   burnt-umber black — never #000
+--color-muted       #6E5F53
+--color-border      #D9CDBD   hairline
 ```
 
-Mono is used deliberately for anything machine-like: prices, order IDs, status
-labels, timestamps, form field hints, nav "eyebrow" labels. It is the one visual
-tell that says "system", and it is free.
+Dark ("kiln at night") — clay lifts to `#D9805A` so it glows rather than
+muddies; paper `#191410`, ink `#F0E7DB`, border `#332A22`.
 
-Scale (Tailwind defaults; hold this hierarchy):
-- Display / hero: `text-6xl` desktop, `text-4xl` mobile, `font-semibold`, `tracking-tight`
-- Section heading: `text-3xl`, `font-semibold`, `tracking-tight`
-- Body: `text-base`, `font-normal`, `leading-relaxed`
-- Caption / meta / eyebrow: `text-xs` or `text-sm`, mono, `uppercase`, `tracking-widest`, muted
+**The discipline rule: at most ~3 terracotta moments per viewport.** Typically
+the CTA, one headline word, and the language cycle. Everything else is paper,
+ink, muted and hairlines. Terracotta everywhere stops reading as premium and
+becomes startup-orange.
 
-Two weights max on a screen: `font-semibold` + `font-normal`. `font-medium` is
-allowed on buttons and nav only.
+**No red for errors here.** `--color-danger` sits too close to the identity
+colour. Marketing form errors use ink + an underline + a mark. (The functional
+surface keeps its semantic palette.)
 
-## Color (monochrome — these are the only values)
+### Typography
 
-```css
-/* light */
---color-ink:      #0A0A0A;  /* primary text, primary button bg */
---color-paper:    #FFFFFF;  /* page background */
---color-surface:  #FAFAFA;  /* card / raised background */
---color-border:   #E4E4E4;  /* hairline */
---color-muted:    #6B6B6B;  /* secondary text */
---color-faint:    #F2F2F2;  /* subtle fills, hover, skeletons */
+- **Display** — `font-display` (Bricolage Grotesque, variable). Headlines,
+  tier names, the wordmark. Tight tracking (`-0.03em` at large sizes),
+  line-height ~1.0.
+- **Body** — `font-sans` (Anek Latin, variable). Everything else.
+- **Functional** — `font-mono` (system). Prices, index numerals, specs.
+- **Indic** — Anek covers Devanagari, Bangla, Tamil, Telugu, Kannada,
+  Malayalam, Gujarati, Gurmukhi and Odia in one consistent superfamily; Urdu
+  uses Noto Nastaliq. Loaded with `preload: false` — they must never block
+  first paint.
 
-/* dark — prefers-color-scheme: dark */
---color-ink:      #FFFFFF;
---color-paper:    #0A0A0A;
---color-surface:  #141414;
---color-border:   #262626;
---color-muted:    #8A8A8A;
---color-faint:    #1C1C1C;
-```
+Both Latin faces are self-hosted by `next/font` (`src/lib/fonts.ts`) and
+exposed as CSS variables on `<html>`, consumed only inside the scope.
 
-There is **no accent color**. The "accent" is maximum contrast: a solid `ink`
-button on `paper`, or inverted. Links are `ink` with an underline offset, not a
-color.
+### Geometry
 
-Functional-only colors (never decorative, never in marketing UI):
+**Square. Nothing on this surface is rounded** — `--radius-*` are all `0`
+inside the scope. The square is part of the identity.
 
-```css
---color-danger:  #E5484D;  /* destructive actions, error text, failed payment */
---color-success: #30A46C;  /* confirmed payment, delivered status */
-```
+Hairline borders over shadows. The page carries **exactly one** shadow, on the
+primary tile. Elevation elsewhere is communicated by border + surface change.
 
-Status pills may use `danger` / `success` sparingly; everything else is
-monochrome (`muted` text on `faint` fill).
+### Grid and composition
 
-## Spacing & radius
+12 columns, max 1240px, inside a bordered "broadsheet column". Content spans
+**unequal** numbers of columns on purpose; headlines break the grid. Gutters
+32–48px. Never a row of identical cards — see `<TierGrid>`: one large filled
+primary tile plus three quiet secondary tiles that deliberately do not
+top-align with it.
 
-Spacing: 4, 8, 12, 16, 24, 32, 48, 64, 96, 128 — Tailwind's default scale.
-Never invent values.
+### Motion — "ink settling + letterpress"
 
-Radius (tighter than default — the futuristic edge):
-- Cards / panels / modals: `rounded-xl` (12px)
-- Buttons / inputs / selects: `rounded-lg` (8px)
-- Pills / tags / status badges: `rounded-md` (6px) — not fully round
-- Avatars only: `rounded-full`
+CSS + variable-font weight + GSAP ScrollTrigger only. No WebGL.
 
-## Borders & elevation
+- Headings **set** on scroll-in: fade up 8px while weight settles 480 → 600
+  over 500ms (`<SetType>`).
+- Section rules **draw**: width 0 → 100%, ~600ms (`<DrawRule>`).
+- Language cycle: crossfade + 6px rise, 420ms, ~3.8s hold — the one "alive"
+  element, offset between instances.
+- CTA hover: deepen to clay-fired + `translateY(1px)` — a stamp press.
+- Tiles: border draws in with a 20ms stagger; hover thickens to 2px clay.
 
-Prefer a 1px `border` hairline over shadow. Elevation is communicated by border
-plus a change of surface, not by a drop shadow.
+**`prefers-reduced-motion` renders every final state immediately.** Nothing is
+lost. This is not optional.
 
-At most one shadow, only on genuinely floating elements (dropdown, popover,
-toast) — never on cards or buttons:
+### Signature elements
 
-```css
-box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.12);
-```
+1. **The language cycle** — a short phrase rotating through 12 Indian scripts
+   in exactly three places (hero eyebrow, closing line, footer). Never the
+   headline.
+2. **The modular tile grid** — square, unequal, art-directed.
+3. **The Mark** — the trust fixture, bottom-left on desktop, inline on mobile.
+   Fades in once, never pulses, changes only on interaction or silently.
 
-No colored shadows. No glows.
+### What to avoid
 
-## Motion
+Rounded cards · shadows on anything but the primary tile · a second accent
+colour · gradients as decoration · stock illustration or icon sets · emoji in
+UI copy · fake urgency, countdowns or invented numbers · any animation that
+fires without the user doing something.
 
-120–220ms, `ease-out`, `opacity` and `transform` only. No bounce, no spring.
+---
 
-```css
-transition: opacity 180ms cubic-bezier(0.16, 1, 0.3, 1),
-            transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
-```
+## Functional surface — monochrome
 
-Page / section reveals: fade + 8px rise, once — not on every scroll.
+Unchanged. Neutral near-black/white, `--radius-md/lg/xl` at 6/8/12px, system
+font stack, semantic `--color-danger` / `--color-success` for status. Quiet,
+legible, gets out of the way. Do not bring terracotta, display type or motion
+into the dashboard.
 
-## Layout
+---
 
-- Max content width **1200px**, centered. Side padding: 20px mobile, 40px
-  tablet, 64px+ desktop.
-- Section vertical rhythm: 96–128px between major sections on desktop, 64px mobile.
-- Optional structural device: a faint 1px vertical rule or column guide aligned
-  to the grid — for structure, never decoration.
-- Hero: one headline, one line of subhead, one primary CTA. No second CTA.
+## Spacing (both surfaces)
 
-## Components
+Tailwind's default scale — 4, 8, 12, 16, 24, 32, 48, 64, 96, 128. Never invent
+values. Editorial section rhythm is 96–128px desktop, 64px mobile; the
+functional surface is tighter.
 
-- **Buttons** — primary: solid `ink` bg, `paper` text. Secondary: transparent
-  bg, 1px `border`, `ink` text. Height 44px, `rounded-lg`, `font-medium`,
-  sentence case (no all-caps). Hover: primary → 90% opacity; secondary fills with
-  `faint`. Focus: 2px `ink` ring, 2px offset.
-- **Cards** — `surface` bg, 1px `border`, `rounded-xl`, 24–32px padding. No shadow.
-- **Nav** — sticky; on scroll, `backdrop-blur-md` with `bg-paper/70`; 1px bottom
-  `border`; no shadow. Link style: mono `uppercase text-xs tracking-widest`, or
-  plain `text-sm` — pick one and keep it.
-- **Forms** — label above input, mono `text-xs uppercase tracking-widest muted`.
-  Input: 44px height, transparent bg, 1px `border`, `rounded-lg`. Focus = 2px
-  `ink` ring, no color change. Errors: `danger` text below, `danger` border.
-- **Status badge** — `rounded-md`, `text-xs`, mono, uppercase. Monochrome by
-  default (`muted` on `faint`); `success` / `danger` only for delivered / failed.
+## Responsive
 
-## What to avoid
-
-Chromatic accent colors. Gradients as decoration. Drop shadows on text or cards.
-Glows. Stock "hero illustration" or 3D-blob graphics. Emoji in UI copy.
-Rounded-everything (keep radii tight). Dense dashboards — when it feels crowded,
-add whitespace before adding content.
+Mobile-first, down to 360px. Display type stays large but tuned never to
+overflow. On mobile the tile grid collapses to one primary tile plus a
+three-row index, the Mark moves inline, the language cycle runs in one place
+only and slower, and cursor-dependent effects are off entirely.
