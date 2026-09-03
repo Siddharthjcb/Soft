@@ -172,3 +172,32 @@ Anything that cannot be finished without a live service gets a skeleton with a
       public page, `src/app/sitemap.ts`, `src/app/robots.ts`, and JSON-LD
       Organization + Service structured data on the home page. Use
       NEXT_PUBLIC_APP_URL for absolute URLs. Confirm `npm run build` passes."
+
+## Phase 11 — Tests (v1.3)
+
+Closes B-09. Nothing was verified beyond compiling.
+
+- [x] **11.1** "Set up Vitest (node environment, `src/**/*.test.ts`, tsconfig
+      path aliases) with `npm test` / `npm run test:watch`, and add a Test step
+      to CI between typecheck and build. Write unit tests for the pure logic
+      that matters: `formatINR` (Indian grouping, paise only when needed),
+      pricing (catalog integrity, `computeOrderTotal` across every tier/plan
+      combination, line items always summing to the total, `deliveryDays`),
+      Razorpay signature verification (valid, tampered, wrong secret, wrong
+      length, unconfigured), `isStaleEvent` replay window, every zod schema's
+      accept/reject cases, and `apiErrorMessage` envelope parsing."
+
+- [ ] **11.2** "Behavioural tests for the settlement path with a mocked Prisma
+      client: `settleOrderPayment` marks a payment success exactly once under
+      concurrent calls, flips a pending order to `new`, sets `deadlineDate`
+      from the delivery plan, rolls a hosting subscription forward instead of
+      touching order status, and returns `unknown_reference` for an unmatched
+      id. Also cover `rateLimit` window boundaries and the `/api/orders`
+      idempotency-key short-circuit."
+
+- [ ] **11.3** "Playwright smoke test over the surfaces that need no
+      credentials: home, /pricing, /portfolio render with expected headings and
+      a working nav; /order/new advances category -> tier -> add-ons with the
+      running total updating; /dashboard and /admin redirect an anonymous
+      visitor to sign-in. Run against `next build && next start` with the
+      placeholder env. Add to CI only if it stays under ~2 minutes."

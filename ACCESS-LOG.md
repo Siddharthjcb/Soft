@@ -137,6 +137,17 @@ the project unless called out in the "Outside the project" section at the end.
 
 ---
 
+## Phase 11 — Tests
+
+### 11.1 — Vitest + unit tests for pure logic
+- **A** `vitest.config.mts`, `src/lib/format.test.ts`, `src/lib/pricing.test.ts`, `src/lib/razorpay.test.ts`, `src/lib/webhook.test.ts`, `src/lib/schemas.test.ts`, `src/lib/client-error.test.ts`
+- **M** `package.json` (test scripts, `@types/node` ^20 -> ^22), `.github/workflows/ci.yml` (Test step), `src/lib/razorpay.ts` (lazy client), `src/app/api/payments/create/route.ts`, `src/app/api/admin/hosting/[subId]/payment-link/route.ts`, `BUILD_PLAN.md`, `BLOCKERS.md` (B-09 partly closed)
+- **Dependencies:** `vitest` (dev); `@types/node` bumped to ^22 to match the Node 22 runtime. `vite-tsconfig-paths` was installed then removed once Vite's native `resolve.tsconfigPaths` proved sufficient
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+---
+
 ## Outside the project — session of 2026-09-03
 
 Done **before** this logging rule existed. Nothing at OS root; no `sudo` was

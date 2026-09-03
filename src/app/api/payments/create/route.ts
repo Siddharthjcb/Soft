@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { razorpay } from "@/lib/razorpay";
+import { getRazorpay } from "@/lib/razorpay";
 import { jsonError, parseJson, requireApiUser } from "@/lib/api";
 import { enforceRateLimit, LIMITS } from "@/lib/rate-limit";
 import { createPaymentBody } from "@/lib/schemas";
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     });
   }
 
-  const rzpOrder = await razorpay.orders.create({
+  const rzpOrder = await getRazorpay().orders.create({
     amount: order.priceTotal, // paise
     currency: "INR",
     receipt: order.id,

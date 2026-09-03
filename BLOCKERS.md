@@ -59,11 +59,13 @@ sync webhook writes it.
 **To close:** supply real case studies (client, category, screenshot, outcome,
 permission to publish).
 
-## B-09 — No automated tests · `open`
-Nothing but lint/typecheck/build. Pricing maths, signature verification and
-rate limiting are all untested in code.
-**To close:** a testing module (Vitest for units, Playwright smoke for the
-order flow).
+## B-09 — Automated tests · `open` (partly closed)
+Vitest is set up and runs in CI; 49 unit tests cover pricing maths, INR
+formatting, Razorpay signature verification, the webhook replay window, every
+zod schema, and API error parsing (task 11.1).
+**Still open:** behavioural tests against a mocked Prisma (settlement
+idempotency, rate-limit windows, order idempotency key) — task 11.2 — and a
+Playwright smoke run over the credential-free surfaces — task 11.3.
 
 ## B-10 — Next 16 deprecates `middleware.ts` · `open`
 Build warns that the convention is now `proxy.ts`. Kept as `middleware.ts`

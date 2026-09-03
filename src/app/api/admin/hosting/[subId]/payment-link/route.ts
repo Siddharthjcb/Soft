@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { razorpay } from "@/lib/razorpay";
+import { getRazorpay } from "@/lib/razorpay";
 import { jsonError, parseParams, requireApiAdmin } from "@/lib/api";
 import { subIdParams } from "@/lib/schemas";
 
@@ -31,7 +31,7 @@ export async function POST(
 
   const period = new Date().toISOString().slice(0, 7); // YYYY-MM
 
-  const link = (await razorpay.paymentLink.create({
+  const link = (await getRazorpay().paymentLink.create({
     amount: sub.monthlyFee,
     currency: "INR",
     description: `Hosting & maintenance — order ${sub.orderId} — ${period}`,

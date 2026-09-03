@@ -1,14 +1,32 @@
 import Razorpay from "razorpay";
 import crypto from "node:crypto";
 
+let client: Razorpay | null = null;
+
 /**
- * Server-side Razorpay client. Test-mode keys for now (CLAUDE.md).
- * Keys come from RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET.
+ * Server-side Razorpay client, constructed on first use. Test-mode keys for
+ * now (CLAUDE.md).
+ *
+ * Deliberately lazy: the SDK throws if `key_id` is empty, so building it at
+ * module scope would make *importing* this file crash whenever the env vars
+ * are missing — taking down every route that touches payments, with an opaque
+ * error. This way the failure is explicit and only at the point of use, and
+ * the signature helpers below stay importable without any keys.
  */
-export const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID ?? "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET ?? "",
-});
+export function getRazorpay(): Razorpay {
+  if (client) return client;
+
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) {
+    throw new Error(
+      "Razorpay is not configured: set RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.",
+    );
+  }
+
+  client = new Razorpay({ key_id: keyId, key_secret: keySecret });
+  return client;
+}
 
 /**
  * Verify the signature Razorpay Checkout hands back to the browser:
