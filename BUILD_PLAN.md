@@ -42,7 +42,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       state is fine — we'll fill it with real work later)."
 
 ## Phase 3 — Order flow
-- [ ] **3.1** "Build /order/new as a multi-step form: (1) pick category, (2)
+- [x] **3.1** "Build /order/new as a multi-step form: (1) pick category, (2)
       pick tier, (3) pick delivery speed + add-ons — show running total price,
       (4) requirements text area + file upload (Vercel Blob) for assets, (5)
       review + confirm. On confirm, create an Order row with status
