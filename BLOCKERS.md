@@ -23,8 +23,11 @@ because no DB exists yet). After the first real migrate, schema changes must use
 ## B-02 — Clerk not configured · `needs-operator`
 Auth, the sign-in/up pages, route gating and the user-sync webhook have never
 run. `.env` holds a syntactically valid dummy publishable key so the app builds.
-**To close:** create a Clerk project, paste real keys, add the webhook endpoint
-`<APP_URL>/api/webhooks/clerk`, set `CLERK_WEBHOOK_SECRET`.
+**To close:** create a Clerk project at dashboard.clerk.com (free tier, no
+card), paste the publishable + secret keys into `.env`, add the webhook
+endpoint `<APP_URL>/api/webhooks/clerk`, set `CLERK_WEBHOOK_SECRET`.
+Closing this also unblocks B-07 (no admin user) and B-14 (three e2e tests are
+skipped without it) — it is the single largest unblock on this list.
 
 ## B-03 — Razorpay not configured · `needs-operator`
 Checkout, order creation, the webhook and payment links are all untested.
@@ -67,14 +70,28 @@ zod schema, and API error parsing (task 11.1).
 task 11.3. Mocked-Prisma behaviour tests (settlement idempotency, rate-limit
 windows) landed in 11.2.
 
-## B-14 — Playwright cannot run in the agent sandbox · `open`
-The e2e suite (`e2e/smoke.spec.ts`, 11 tests) is committed and wired into CI,
-but it could not be executed locally: the browser subprocess fails every
-navigation with `ERR_NAME_NOT_RESOLVED` on `127.0.0.1` while the Node-side
-`request` fixture reaches the same server fine — the sandbox restricts the
-browser's network, not the tests. CI is the verification path.
-**To close:** run `npm run test:e2e` on your machine to confirm it passes
-outside CI too.
+## B-14 — Browser tests behind Clerk are skipped · `needs-operator`
+The three `/order/new` e2e tests are skipped until real Clerk keys exist.
+
+**Root cause** (an earlier entry here blamed the agent sandbox — that was
+wrong; it reproduced identically on a clean GitHub runner): a `pk_test_` key
+puts Clerk in development mode, where it runs a *dev-browser handshake* on
+real browser navigations — redirecting to the Clerk frontend domain to set a
+cookie. Our placeholder key decodes to `clerk-placeholder.example.com`, which
+does not resolve, so every browser navigation through clerkMiddleware dies
+with `ERR_NAME_NOT_RESOLVED`. `curl` never saw it because the handshake only
+fires for browser-like requests; the tell is the response header
+`x-clerk-auth-reason: dev-browser-missing`.
+
+**Fixed as a side effect:** `src/middleware.ts` used to match every route, so
+Clerk ran on `/`, `/pricing` and `/portfolio` too — meaning a misconfigured
+Clerk key would have taken the entire public site down in a real browser, and
+static pages were needlessly uncacheable. The matcher is now scoped to
+`/dashboard`, `/admin`, `/order`, `/sign-in`, `/sign-up`, `/api`. Public pages
+no longer touch Clerk at all, and their 8 e2e tests pass.
+
+**To close:** set real Clerk keys (B-02), then run
+`E2E_CLERK=1 npm run test:e2e` and add `E2E_CLERK: "1"` to the CI job env.
 
 ## B-10 — Next 16 deprecates `middleware.ts` · `open`
 Build warns that the convention is now `proxy.ts`. Kept as `middleware.ts`

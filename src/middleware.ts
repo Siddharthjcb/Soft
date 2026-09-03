@@ -27,10 +27,21 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
+  // Only the routes that actually need auth. Deliberately NOT a catch-all:
+  // clerkMiddleware performs a dev-browser handshake on browser navigations
+  // when using pk_test_ keys, which redirects to the Clerk frontend domain.
+  // Running that on "/", "/pricing" and "/portfolio" bought us nothing, made
+  // static pages uncacheable, and meant a misconfigured Clerk key took the
+  // whole public site down in a browser. These pages never call auth().
+  //
+  // /order/:path* is included because /order/new calls auth() to decide
+  // whether to show the sign-in gate — auth() throws without the middleware.
   matcher: [
-    // Run on everything except Next internals and static files...
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // ...and always on API routes.
-    "/(api|trpc)(.*)",
+    "/dashboard/:path*",
+    "/admin/:path*",
+    "/order/:path*",
+    "/sign-in/:path*",
+    "/sign-up/:path*",
+    "/api/:path*",
   ],
 };

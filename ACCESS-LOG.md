@@ -160,6 +160,12 @@ the project unless called out in the "Outside the project" section at the end.
 - **Side effects:** ~95MB browser download into node_modules (gitignored). Suite could not execute in the agent sandbox — see B-14; CI verifies it
 - **Outside the project:** None
 
+### 11.3a — Fix: scope Clerk middleware; gate Clerk-dependent e2e tests
+- **M** `src/middleware.ts` (matcher narrowed from catch-all to auth routes only), `e2e/smoke.spec.ts` (order-form tests gated behind E2E_CLERK; /order/new dropped from the 375px sweep), `BLOCKERS.md` (B-14 rewritten with the real root cause; B-02 expanded)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None. A probe script was briefly written to `/tmp` during debugging, then moved inside the project and deleted — noted here for completeness.
+
 ---
 
 ## Outside the project — session of 2026-09-03
