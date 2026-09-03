@@ -36,7 +36,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       one CTA to /order/new, a section listing the 4 tiers with pricing, a
       section listing the 4 categories with short descriptions, a simple
       footer. Static content is fine for now — no CMS."
-- [ ] **2.2** "Build /pricing as a dedicated page: clear tier comparison
+- [x] **2.2** "Build /pricing as a dedicated page: clear tier comparison
       (table or cards), delivery-speed add-on, customization add-on, security
       add-on, all pricing in ₹. Build /portfolio as a placeholder grid (empty
       state is fine — we'll fill it with real work later)."
