@@ -19,6 +19,9 @@ CREATE TYPE "PaymentType" AS ENUM ('order', 'hosting');
 -- CreateEnum
 CREATE TYPE "PaymentStatus" AS ENUM ('created', 'success', 'failed');
 
+-- CreateEnum
+CREATE TYPE "HostingStatus" AS ENUM ('active', 'paused', 'cancelled');
+
 -- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
@@ -89,6 +92,19 @@ CREATE TABLE "Receipt" (
     CONSTRAINT "Receipt_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "HostingSubscription" (
+    "id" TEXT NOT NULL,
+    "orderId" TEXT NOT NULL,
+    "monthlyFee" INTEGER NOT NULL,
+    "nextBillingDate" TIMESTAMP(3) NOT NULL,
+    "status" "HostingStatus" NOT NULL DEFAULT 'active',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "HostingSubscription_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "User_clerkId_key" ON "User"("clerkId");
 
@@ -119,6 +135,9 @@ CREATE UNIQUE INDEX "Receipt_paymentId_key" ON "Receipt"("paymentId");
 -- CreateIndex
 CREATE UNIQUE INDEX "Receipt_receiptNumber_key" ON "Receipt"("receiptNumber");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "HostingSubscription_orderId_key" ON "HostingSubscription"("orderId");
+
 -- AddForeignKey
 ALTER TABLE "Order" ADD CONSTRAINT "Order_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
@@ -130,4 +149,7 @@ ALTER TABLE "Payment" ADD CONSTRAINT "Payment_orderId_fkey" FOREIGN KEY ("orderI
 
 -- AddForeignKey
 ALTER TABLE "Receipt" ADD CONSTRAINT "Receipt_paymentId_fkey" FOREIGN KEY ("paymentId") REFERENCES "Payment"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "HostingSubscription" ADD CONSTRAINT "HostingSubscription_orderId_fkey" FOREIGN KEY ("orderId") REFERENCES "Order"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 

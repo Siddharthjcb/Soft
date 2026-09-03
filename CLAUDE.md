@@ -55,6 +55,8 @@ This platform only needs to let customers select a category when ordering.
 - **Payment** — id, orderId, razorpayOrderId, razorpayPaymentId, amount,
   type (`order` | `hosting`), status
 - **Receipt** — id, paymentId, receiptNumber, issuedAt
+- **HostingSubscription** — id, orderId, monthlyFee (paise), nextBillingDate,
+  status (`active` | `paused` | `cancelled`) — manual monthly billing (Phase 6)
 
 ## Route map
 

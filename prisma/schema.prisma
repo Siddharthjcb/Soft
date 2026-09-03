@@ -47,6 +47,12 @@ enum PaymentStatus {
   failed
 }
 
+enum HostingStatus {
+  active
+  paused
+  cancelled
+}
+
 model User {
   id        String   @id @default(cuid())
   clerkId   String   @unique
@@ -75,6 +81,7 @@ model Order {
   priceTotal       Int // paise
   assets           Asset[]
   payments         Payment[]
+  hosting          HostingSubscription?
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
 
@@ -115,4 +122,15 @@ model Receipt {
   payment       Payment  @relation(fields: [paymentId], references: [id])
   receiptNumber String   @unique
   issuedAt      DateTime @default(now())
+}
+
+model HostingSubscription {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id])
+  monthlyFee      Int // paise
+  nextBillingDate DateTime
+  status          HostingStatus @default(active)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }

@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { PaymentStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { Container } from "@/components/ui/container";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { AdminOrderControls } from "@/components/admin/admin-order-controls";
+import { HostingControls } from "@/components/admin/hosting-controls";
 import {
   categoryLabel,
   tierLabel,
@@ -30,6 +31,7 @@ export default async function AdminOrderPage({
       user: true,
       assets: true,
       payments: { include: { receipt: true } },
+      hosting: true,
     },
   });
   if (!order) notFound();
@@ -136,6 +138,22 @@ export default async function AdminOrderPage({
           currentStatus={order.status}
           currentDeliveredUrl={order.deliveredUrl}
         />
+
+        {(order.status === OrderStatus.delivered || order.hosting) && (
+          <HostingControls
+            orderId={order.id}
+            subscription={
+              order.hosting
+                ? {
+                    id: order.hosting.id,
+                    monthlyFee: order.hosting.monthlyFee,
+                    nextBillingDate: order.hosting.nextBillingDate.toISOString(),
+                    status: order.hosting.status,
+                  }
+                : null
+            }
+          />
+        )}
       </div>
     </Container>
   );

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { OrderStatus, PaymentStatus } from "@prisma/client";
+import { OrderStatus, PaymentStatus, PaymentType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { verifyWebhookSignature } from "@/lib/razorpay";
 import { describeOrderLineItems, type OrderSelections } from "@/lib/pricing";
@@ -14,13 +14,15 @@ interface RazorpayWebhook {
   payload: {
     payment?: { entity: { id: string; order_id: string } };
     order?: { entity: { id: string } };
+    payment_link?: { entity: { id: string } };
   };
 }
 
 /**
- * Razorpay webhook. On a captured payment / paid order we mark the Payment
- * row success and flip the Order from pending_payment to `new` (ready for
- * fulfilment). Idempotent.
+ * Razorpay webhook. On a captured payment / paid order / paid payment link we
+ * mark the Payment row success. For an order payment we also flip the Order
+ * pending_payment -> new; for a hosting payment link we advance the
+ * subscription's nextBillingDate by a month. Idempotent.
  */
 export async function POST(request: Request) {
   const raw = await request.text();
@@ -38,13 +40,17 @@ export async function POST(request: Request) {
   }
 
   const isPaid =
-    event.event === "payment.captured" || event.event === "order.paid";
+    event.event === "payment.captured" ||
+    event.event === "order.paid" ||
+    event.event === "payment_link.paid";
   if (!isPaid) {
     return NextResponse.json({ ok: true, ignored: event.event });
   }
 
   const razorpayOrderId =
-    event.payload.payment?.entity.order_id ?? event.payload.order?.entity.id;
+    event.payload.payment?.entity.order_id ??
+    event.payload.order?.entity.id ??
+    event.payload.payment_link?.entity.id;
   const razorpayPaymentId = event.payload.payment?.entity.id ?? null;
   if (!razorpayOrderId) {
     return NextResponse.json({ error: "no order id in payload" }, { status: 400 });
@@ -55,7 +61,7 @@ export async function POST(request: Request) {
     include: { order: true },
   });
   if (!payment) {
-    // Unknown order — ack so Razorpay stops retrying.
+    // Unknown reference — ack so Razorpay stops retrying.
     return NextResponse.json({ ok: true, unknown: razorpayOrderId });
   }
   if (payment.status === PaymentStatus.success) {
@@ -76,8 +82,24 @@ export async function POST(request: Request) {
     }),
   ]);
 
-  // Receipt + emails. Best-effort: a mail failure must not fail the webhook
-  // (the payment is already recorded and this event won't be reprocessed).
+  // Hosting payment: roll the subscription's next billing date forward.
+  if (payment.type === PaymentType.hosting) {
+    const sub = await prisma.hostingSubscription.findUnique({
+      where: { orderId: payment.orderId },
+    });
+    if (sub) {
+      const next = new Date(sub.nextBillingDate);
+      next.setMonth(next.getMonth() + 1);
+      await prisma.hostingSubscription.update({
+        where: { id: sub.id },
+        data: { nextBillingDate: next },
+      });
+    }
+    return NextResponse.json({ ok: true, hosting: true });
+  }
+
+  // Order payment: receipt + emails. Best-effort — a mail failure must not
+  // fail the webhook (the payment is already recorded, no reprocessing).
   try {
     const receiptNumber = `RCPT-${new Date()
       .toISOString()
