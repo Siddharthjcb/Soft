@@ -32,7 +32,7 @@ off on success. Or just use the `/build-next` skill interactively/headlessly.
       Clerk webhook or first login). Confirm both redirects work."
 
 ## Phase 2 — Public site
-- [ ] **2.1** "Build the home/pitch page per DESIGN.md: hero with headline +
+- [x] **2.1** "Build the home/pitch page per DESIGN.md: hero with headline +
       one CTA to /order/new, a section listing the 4 tiers with pricing, a
       section listing the 4 categories with short descriptions, a simple
       footer. Static content is fine for now — no CMS."
