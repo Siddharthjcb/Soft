@@ -1,0 +1,178 @@
+// Prisma schema — source of truth is CLAUDE.md "Data model".
+// Money is stored as integers in paise, never floats.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  customer
+  admin
+}
+
+enum Category {
+  portfolio // school / college students
+  restaurant // cloud kitchens — restaurant ordering
+  management // small vendors — management system
+  dashboard // dashboard / other custom
+}
+
+enum DeliveryPlan {
+  rush_2_day
+  standard_1_week
+}
+
+enum OrderStatus {
+  pending_payment
+  new
+  in_progress
+  revision_requested
+  delivered
+}
+
+enum PaymentType {
+  order
+  hosting
+}
+
+enum PaymentStatus {
+  created
+  success
+  failed
+}
+
+enum HostingStatus {
+  active
+  paused
+  cancelled
+}
+
+enum RevisionStatus {
+  open
+  addressed
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  name      String?
+  email     String   @unique
+  phone     String?
+  role      Role     @default(customer)
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id               String       @id @default(cuid())
+  /// client-supplied key so a double-submitted order form is a no-op
+  idempotencyKey   String?      @unique
+  userId           String
+  user             User         @relation(fields: [userId], references: [id])
+  category         Category
+  tier             Int // 1-4, see CLAUDE.md Tiers
+  deliveryPlan     DeliveryPlan
+  addons           Json         @default("[]")
+  requirementsText String?
+  status           OrderStatus  @default(pending_payment)
+  deliveredUrl     String? // live site URL, set when marked delivered (task 5.1)
+  deadlineDate     DateTime?
+  priceTotal       Int // paise
+  assets           Asset[]
+  payments         Payment[]
+  revisions        RevisionRequest[]
+  hosting          HostingSubscription?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Asset {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fileUrl   String
+  fileName  String
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String
+  order             Order         @relation(fields: [orderId], references: [id])
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?       @unique
+  amount            Int // paise
+  type              PaymentType   @default(order)
+  status            PaymentStatus @default(created)
+  receipt           Receipt?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([orderId])
+}
+
+model Receipt {
+  id            String   @id @default(cuid())
+  paymentId     String   @unique
+  payment       Payment  @relation(fields: [paymentId], references: [id])
+  receiptNumber String   @unique
+  issuedAt      DateTime @default(now())
+}
+
+/// A customer's revision request. Kept as history — never overwritten.
+model RevisionRequest {
+  id        String         @id @default(cuid())
+  orderId   String
+  order     Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  note      String
+  status    RevisionStatus @default(open)
+  createdAt DateTime       @default(now())
+
+  @@index([orderId])
+}
+
+/// Replay protection: a webhook event id is claimed once and only once.
+model ProcessedWebhookEvent {
+  id          String   @id @default(cuid())
+  provider    String // "clerk" | "razorpay"
+  eventId     String
+  processedAt DateTime @default(now())
+
+  @@unique([provider, eventId])
+  @@index([processedAt])
+}
+
+/// Fixed-window rate-limit counters. Postgres-backed so there is no extra
+/// service to pay for; expired windows are cleaned up opportunistically.
+model RateLimit {
+  id          String   @id @default(cuid())
+  key         String
+  windowStart DateTime
+  count       Int      @default(0)
+
+  @@unique([key, windowStart])
+  @@index([windowStart])
+}
+
+model HostingSubscription {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id])
+  monthlyFee      Int // paise
+  nextBillingDate DateTime
+  status          HostingStatus @default(active)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}

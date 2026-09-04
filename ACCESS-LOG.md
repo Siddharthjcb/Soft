@@ -1,0 +1,255 @@
+# Access log
+
+A trace of everything Claude touched, appended after every implementation task.
+
+**Rules this log enforces (see CLAUDE.md → Conventions):**
+
+- Work stays inside this project folder. Anything outside it — including the
+  home directory, `~/.ssh`, `~/Library`, `/tmp` — requires asking the operator
+  first, and gets recorded under "Outside the project" below.
+- Never modify anything at the OS root level. Never `sudo`.
+- Every task entry lists: files added/modified/deleted, dependencies installed,
+  commands with side effects, and anything outside the project (normally
+  "None").
+
+Entry format:
+
+```
+## <task id> — <short description>  (<commit sha>)
+Inside the project:  A/M/D <path>
+Dependencies:        <packages added, or None>
+Side effects:        <installs, git pushes, generated migrations, or None>
+Outside the project: None   ← anything else requires prior permission
+```
+
+---
+
+## Retroactive: session of 2026-09-03 (Phases 1–7)
+
+Reconstructed from git history. Per-task file lists below; everything is inside
+the project unless called out in the "Outside the project" section at the end.
+
+### 1.1 — Next.js + Tailwind v4 tokens + Prisma schema (`46a11e8`)
+- **A** `prisma/schema.prisma`, `prisma/migrations/20260903000000_init/migration.sql`, `prisma/migrations/migration_lock.toml`, `src/lib/prisma.ts`
+- **M** `package.json`, `package-lock.json`, `src/app/globals.css`, `src/app/layout.tsx`, `src/app/page.tsx`
+- **D** `public/file.svg`, `public/globe.svg`, `public/next.svg`, `public/vercel.svg`, `public/window.svg`
+- **Dependencies:** `prisma@6.19.3` (dev), `@prisma/client@6.19.3`
+- **Side effects:** `prisma generate`; init migration generated offline via `prisma migrate diff`
+
+### 1.2 — Clerk auth + role-gated middleware (`4d6f585`)
+- **A** `src/middleware.ts`, `src/lib/auth.ts`, `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`, `src/app/dashboard/page.tsx`, `src/app/api/webhooks/clerk/route.ts`, `src/app/sign-in/[[...sign-in]]/page.tsx`, `src/app/sign-up/[[...sign-up]]/page.tsx`
+- **M** `.env.example`, `src/app/layout.tsx`, `package.json`, `package-lock.json`
+- **Dependencies:** `@clerk/nextjs@7`, `svix`
+
+### 2.1 — Home page + marketing shell + CI route-types fix (`1d97894`)
+- **A** `src/app/(marketing)/layout.tsx`, `src/app/(marketing)/page.tsx`, `src/components/site-header.tsx`, `src/components/site-footer.tsx`, `src/components/ui/button.tsx`, `src/components/ui/container.tsx`, `src/lib/pricing.ts`, `src/lib/categories.ts`, `src/lib/format.ts`
+- **M** `.github/workflows/ci.yml`, `package.json`
+- **D** `src/app/page.tsx`
+
+### 2.2 — Pricing and portfolio pages (`2cc7008`)
+- **A** `src/app/(marketing)/pricing/page.tsx`, `src/app/(marketing)/portfolio/page.tsx`
+
+### 3.1 — /order/new multi-step order form (`29ba94f`)
+- **A** `src/app/(marketing)/order/new/page.tsx`, `src/app/api/orders/route.ts`, `src/app/api/upload/route.ts`, `src/app/order/[id]/pay/page.tsx`, `src/components/order/order-form.tsx`
+- **M** `src/lib/pricing.ts`, `package.json`, `package-lock.json`
+- **Dependencies:** `@vercel/blob`
+
+### 3.2 — Razorpay checkout + webhook (`b3f26a1`)
+- **A** `src/lib/razorpay.ts`, `src/app/api/payments/create/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/components/order/pay-button.tsx`
+- **M** `src/app/order/[id]/pay/page.tsx`, `package.json`, `package-lock.json`
+- **Dependencies:** `razorpay`
+
+### 3.3 — PDF receipt + Resend emails on payment (`6621c31`)
+- **A** `src/lib/receipt.tsx`, `src/lib/email.ts`
+- **M** `src/app/api/webhooks/razorpay/route.ts`, `src/lib/pricing.ts`, `package.json`, `package-lock.json`
+- **Dependencies:** `@react-pdf/renderer`, `resend`
+
+### 4.1 — Customer portal (`0675d48`)
+- **A** `src/app/dashboard/layout.tsx`, `src/app/dashboard/orders/[id]/page.tsx`, `src/app/api/orders/[id]/receipt/route.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/components/order/revision-request.tsx`, `src/components/portal-header.tsx`, `src/components/ui/status-badge.tsx`, `src/lib/order-display.ts`
+- **M** `CLAUDE.md`, `prisma/schema.prisma`, `prisma/migrations/.../migration.sql`, `src/app/dashboard/page.tsx`
+- **Side effects:** added `Order.revisionNote`; migration + client regenerated
+
+### 5.1 — Admin queue + detail + status control (`892a48c`)
+- **A** `src/app/admin/orders/[id]/page.tsx`, `src/app/api/admin/orders/[id]/route.ts`, `src/components/admin/admin-order-controls.tsx`
+- **M** `CLAUDE.md`, `prisma/schema.prisma`, `prisma/migrations/.../migration.sql`, `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`, `src/components/ui/status-badge.tsx`, `src/lib/email.ts`, `src/lib/order-display.ts`
+- **Side effects:** added `Order.deliveredUrl`; migration + client regenerated
+
+### 6.1 — Hosting subscription, manual v1 (`bee5012`)
+- **A** `src/app/api/admin/orders/[id]/hosting/route.ts`, `src/app/api/admin/hosting/[subId]/payment-link/route.ts`, `src/components/admin/hosting-controls.tsx`
+- **M** `CLAUDE.md`, `prisma/schema.prisma`, `prisma/migrations/.../migration.sql`, `src/app/admin/orders/[id]/page.tsx`, `src/app/api/webhooks/razorpay/route.ts`
+- **Side effects:** added `HostingSubscription` model; migration + client regenerated
+
+### 7.1 — Visual QA pass against DESIGN.md (`4d75158`)
+- **M** `src/app/globals.css`, `src/components/order/order-form.tsx`, `src/components/order/revision-request.tsx`
+
+### 7.2 — Loading / error / empty states + 404 (`ef177d4`)
+- **A** `src/app/not-found.tsx`, `src/app/error.tsx`, `src/app/global-error.tsx`, `src/components/ui/feedback.tsx`, and `loading.tsx` for `/dashboard`, `/dashboard/orders/[id]`, `/admin`, `/admin/orders/[id]`, `/order/[id]/pay`, `/order/new`
+
+---
+
+## Phase 9 — Hardening
+
+### 9.1 — zod validation + consistent error envelope
+- **A** `src/lib/api.ts`, `src/lib/schemas.ts`
+- **M** `src/app/api/orders/route.ts`, `src/app/api/upload/route.ts`, `src/app/api/payments/create/route.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/app/api/orders/[id]/receipt/route.ts`, `src/app/api/admin/orders/[id]/route.ts`, `src/app/api/admin/orders/[id]/hosting/route.ts`, `src/app/api/admin/hosting/[subId]/payment-link/route.ts`, `src/app/api/webhooks/clerk/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/lib/pricing.ts` (removed dead `isValidSelections`), `package.json`, `package-lock.json`
+- **Dependencies:** `zod@4`
+- **Side effects:** `npm install zod`; no DB schema change, no migration
+- **Outside the project:** None
+
+### 9.2 — Rate limiting on public write routes
+- **A** `src/lib/rate-limit.ts`
+- **M** `prisma/schema.prisma` (added `RateLimit` model), `prisma/migrations/20260903000000_init/migration.sql`, `src/app/api/orders/route.ts`, `src/app/api/upload/route.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/app/api/payments/create/route.ts`
+- **Dependencies:** None
+- **Side effects:** init migration + Prisma client regenerated. No new external service — counters live in Postgres
+- **Outside the project:** None
+
+### 9.3 — Revision history + webhook replay protection
+- **A** `src/lib/webhook.ts`
+- **M** `prisma/schema.prisma` (added `RevisionRequest`, `ProcessedWebhookEvent`, `RevisionStatus`; dropped `Order.revisionNote`), `prisma/migrations/20260903000000_init/migration.sql`, `CLAUDE.md`, `src/lib/schemas.ts`, `src/app/api/orders/[id]/revision/route.ts`, `src/app/api/webhooks/clerk/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/app/dashboard/orders/[id]/page.tsx`, `src/app/admin/orders/[id]/page.tsx`
+- **Dependencies:** None
+- **Side effects:** init migration + Prisma client regenerated
+- **Outside the project:** None
+
+---
+
+## Phase 10 — Reliability & operations
+
+### 10.1 — Payment reliability + order integrity
+- **A** `src/lib/payments.ts`, `src/lib/client-error.ts`, `src/app/api/payments/verify/route.ts`
+- **M** `prisma/schema.prisma` (added `Order.idempotencyKey`), `prisma/migrations/20260903000000_init/migration.sql`, `src/lib/pricing.ts`, `src/lib/razorpay.ts`, `src/lib/schemas.ts`, `src/lib/rate-limit.ts`, `src/app/api/orders/route.ts`, `src/app/api/webhooks/razorpay/route.ts`, `src/components/order/order-form.tsx`, `src/components/order/pay-button.tsx`, `src/components/order/revision-request.tsx`, `src/components/admin/admin-order-controls.tsx`, `src/components/admin/hosting-controls.tsx`
+- **Dependencies:** None
+- **Side effects:** init migration + Prisma client regenerated
+- **Outside the project:** None
+
+### 10.2 — Admin operations upgrade
+- **A** `src/app/admin/customers/page.tsx`, `src/app/admin/customers/loading.tsx`, `src/app/admin/customers/[id]/page.tsx`, `src/app/admin/customers/[id]/loading.tsx`
+- **M** `src/app/admin/layout.tsx`, `src/app/admin/page.tsx`, `BLOCKERS.md` (added B-12)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+### 10.3 — Customer billing page + SEO
+- **A** `src/app/dashboard/billing/page.tsx`, `src/lib/site.ts`, `src/app/sitemap.ts`, `src/app/robots.ts`
+- **M** `src/app/layout.tsx`, `src/app/dashboard/layout.tsx`, `src/app/(marketing)/page.tsx`, `src/app/(marketing)/pricing/page.tsx`, `src/app/(marketing)/portfolio/page.tsx`, `src/app/(marketing)/order/new/page.tsx`, `src/lib/order-display.ts`, `BLOCKERS.md` (added B-13)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+---
+
+## Phase 11 — Tests
+
+### 11.1 — Vitest + unit tests for pure logic
+- **A** `vitest.config.mts`, `src/lib/format.test.ts`, `src/lib/pricing.test.ts`, `src/lib/razorpay.test.ts`, `src/lib/webhook.test.ts`, `src/lib/schemas.test.ts`, `src/lib/client-error.test.ts`
+- **M** `package.json` (test scripts, `@types/node` ^20 -> ^22), `.github/workflows/ci.yml` (Test step), `src/lib/razorpay.ts` (lazy client), `src/app/api/payments/create/route.ts`, `src/app/api/admin/hosting/[subId]/payment-link/route.ts`, `BUILD_PLAN.md`, `BLOCKERS.md` (B-09 partly closed)
+- **Dependencies:** `vitest` (dev); `@types/node` bumped to ^22 to match the Node 22 runtime. `vite-tsconfig-paths` was installed then removed once Vite's native `resolve.tsconfigPaths` proved sufficient
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+### 11.2 — Behavioural tests with a mocked Prisma
+- **A** `src/lib/payments.test.ts`, `src/lib/rate-limit.test.ts`
+- **M** `BUILD_PLAN.md`, `BLOCKERS.md`
+- **Dependencies:** None
+- **Side effects:** None (no schema change; Prisma, react-pdf and Resend are all mocked — no service is contacted)
+- **Outside the project:** None
+
+### 11.3 — Playwright smoke suite
+- **A** `playwright.config.ts`, `e2e/smoke.spec.ts`
+- **M** `package.json` (pretest:e2e / test:e2e), `.github/workflows/ci.yml` (browser install + e2e + report artifact), `.gitignore` (Playwright artifacts), `BLOCKERS.md` (added B-14)
+- **Dependencies:** `@playwright/test` (dev). Chromium downloaded with `PLAYWRIGHT_BROWSERS_PATH=0` so it lands in `node_modules/playwright-core/.local-browsers` **inside the project**, not the default `~/Library/Caches/ms-playwright`
+- **Side effects:** ~95MB browser download into node_modules (gitignored). Suite could not execute in the agent sandbox — see B-14; CI verifies it
+- **Outside the project:** None
+
+### 11.3a — Fix: scope Clerk middleware; gate Clerk-dependent e2e tests
+- **M** `src/middleware.ts` (matcher narrowed from catch-all to auth routes only), `e2e/smoke.spec.ts` (order-form tests gated behind E2E_CLERK; /order/new dropped from the 375px sweep), `BLOCKERS.md` (B-14 rewritten with the real root cause; B-02 expanded)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None. A probe script was briefly written to `/tmp` during debugging, then moved inside the project and deleted — noted here for completeness.
+
+---
+
+## SG — SiteGen (instant template sites)
+
+### SG-0 — Architecture draft
+- **A** `docs/ARCHITECTURE-SITEGEN.md`, `screenshots/` (gitignored review artifacts)
+- **M** `.gitignore`
+- **Dependencies:** None
+- **Side effects:** None — planning only, no code, no schema change
+- **Outside the project:** None
+
+### SG-0a — Decisions accepted; CLAUDE.md realigned
+- **M** `docs/ARCHITECTURE-SITEGEN.md` (status DRAFT -> ACCEPTED; §11 rewritten with the six resolved decisions and their consequences), `CLAUDE.md` (two delivery modes; tier table now records which tier is instant vs commissioned), `BLOCKERS.md` (B-06 extended with the SiteGen price)
+- **Dependencies:** None
+- **Side effects:** None — documentation only, no code, no schema change
+- **Outside the project:** None
+
+---
+
+## VIS — Visual identity
+
+### VIS-0 — Design direction proposal (terracotta + language cycle + tiles + trust mark)
+- **A** `docs/DESIGN-DIRECTION.md`
+- **M** `.gitignore` (ignore `/design/` mock working files)
+- **Dependencies:** None
+- **Side effects:** None — proposal only, no code, no schema change. A design canvas was published to the user's own Artifacts (not a repo change)
+- **Outside the project:** None
+
+### VIS-12.1 — Editorial token scope + fonts
+- **A** `src/lib/fonts.ts`
+- **M** `DESIGN.md` (rewritten for two surfaces), `src/app/globals.css` (editorial scope, clay tokens, grain), `src/app/layout.tsx` (font vars on html), `src/app/(marketing)/layout.tsx` (data-surface wrapper), `BUILD_PLAN.md`
+- **Dependencies:** Bricolage Grotesque + Anek Latin via `next/font/google` (self-hosted at build, no new npm package)
+- **Side effects:** None (no schema change). Verified in a real browser that the scope resolves and the dashboard tokens are untouched
+- **Outside the project:** None
+
+### VIS-12.2 — Motion foundation
+- **A** `src/components/motion/set-type.tsx`, `src/components/motion/draw-rule.tsx`
+- **M** `src/components/ui/button.tsx` (data-variant hook), `src/app/globals.css` (scoped stamp-press CTA), `package.json`
+- **Dependencies:** `gsap`
+- **Side effects:** None (no schema change). GSAP is dynamically imported so it stays out of the initial bundle
+- **Outside the project:** None
+
+### VIS-12.3 — LanguageCycle + 12 scripts
+- **A** `src/lib/languages.ts`, `src/lib/languages.test.ts`, `src/components/language-cycle.tsx`
+- **M** `src/lib/fonts.ts` (ten Indic faces, all `preload: false`)
+- **Dependencies:** ten more `next/font/google` families (self-hosted at build, no npm package)
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+### VIS-12.4 — TrustMark + context hook
+- **A** `src/lib/trust-mark.ts`, `src/components/trust-mark.tsx`
+- **Dependencies:** None
+- **Side effects:** Writes a single `seen-before` flag to localStorage (wrapped in try/catch for private mode). No schema change
+- **Outside the project:** None
+
+### VIS-12.5 / 12.6 — TierGrid, CTA config, home page rebuilt
+- **A** `src/components/tier-grid.tsx`, `src/lib/cta.ts`
+- **M** `src/lib/pricing.ts` (Tier.short), `src/app/(marketing)/page.tsx`, `src/components/site-header.tsx`, `src/components/site-footer.tsx`, `src/components/motion/set-type.tsx` + `draw-rule.tsx` (in-view guard), `src/components/trust-mark.tsx` (shared returning-visitor read)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+### VIS-12.7 — Pricing, portfolio, sticky CTA, e2e
+- **A** `src/components/sticky-cta.tsx`
+- **M** `src/app/(marketing)/pricing/page.tsx`, `src/app/(marketing)/portfolio/page.tsx`, `src/app/(marketing)/layout.tsx`, `e2e/smoke.spec.ts`, `BLOCKERS.md` (added VIS-B4)
+- **Dependencies:** None
+- **Side effects:** None (no schema change)
+- **Outside the project:** None
+
+---
+
+## Outside the project — session of 2026-09-03
+
+Done **before** this logging rule existed. Nothing at OS root; no `sudo` was
+ever run by Claude (the one `sudo xcodebuild -license` was run by the operator).
+
+| Path | Access | Reason |
+|---|---|---|
+| `~/.nvm/versions/node/v22.23.2/` | **Wrote** — installed Node 22 | Node 23 (the machine default) is rejected by Prisma. Matches `.nvmrc` and CI. Reversible: `nvm uninstall 22` |
+| `~/.claude/projects/…-sideproj/memory/` | **Wrote** — 3 memory notes | Session memory (project status, toolchain constraints, index). Deletable on request |
+| `~/.ssh` | **Listed** (did not exist) | Diagnosing the failed `git push` — checking for an SSH key |
+| `~/.ssh/known_hosts` | **Read** (did not exist) | Same — SSH host-key verification error |
+| `git config credential.helper` | **Read** | Same — determining the auth path |
+| `~/package.json`, `~/package-lock.json` | **Listed** (not read, not modified) | Turbopack was inferring the wrong workspace root from these |
+| `/tmp/migdiff.err`, `/tmp/md.err`, `/tmp/pr-body.md` | **Wrote** — scratch files | Should have used the session scratchpad. Safe to delete |
+
+**Going forward:** anything in this section requires asking the operator first.
