@@ -19,7 +19,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.9.0",
+    "@clerk/nextjs": "^7.9.1",
     "@prisma/client": "^6.19.3",
     "@react-pdf/renderer": "^4.9.0",
     "@vercel/blob": "^2.8.0",
@@ -28,12 +28,12 @@
     "razorpay": "^2.9.8",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "resend": "^6.25.0",
+    "resend": "^6.26.0",
     "svix": "^2.3.0",
     "zod": "^4.5.4"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.1",
     "@types/react": "^19",
