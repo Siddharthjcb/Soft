@@ -19,30 +19,30 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.9.0",
+    "@clerk/nextjs": "^7.9.4",
     "@prisma/client": "^6.19.3",
     "@react-pdf/renderer": "^4.9.0",
     "@vercel/blob": "^2.8.0",
     "gsap": "^3.15.0",
-    "next": "16.3.4",
+    "next": "16.3.5",
     "razorpay": "^2.9.8",
-    "react": "19.2.8",
-    "react-dom": "19.2.8",
-    "resend": "^6.25.0",
-    "svix": "^2.3.0",
-    "zod": "^4.5.4"
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "resend": "^6.28.1",
+    "svix": "^2.5.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@playwright/test": "^1.62.1",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^22.20.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.4",
+    "eslint-config-next": "16.3.5",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^5.0.0"
+    "vitest": "^5.0.1"
   }
 }
